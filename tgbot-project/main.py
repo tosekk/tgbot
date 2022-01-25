@@ -7,30 +7,31 @@ from telebot import types
 
 #Local Modules
 import bot_token
+from commands_handler import CommandsHandler
+
 
 bot = TeleBot(bot_token.token)
+commands = CommandsHandler()
 
-def text_handler(command: str):
-        text = ''
-        start = f"[{command[1:]}]"
-        stop = f"[{command}]"
-
-        with open('texts.txt', 'r', encoding='utf-8') as file:
-            for line in file:
-                if start in line:
-                    continue
-                elif stop in line:
-                    break
-                else:
-                    text += line
-        return text
 
 @bot.message_handler(commands=['start'])
-def welcome(message):
-    reply = text_handler(message.text)
+def welcome_message(message):
+    reply = commands.reply_handler(message.text)
+    animation = open("static/greeting.gif", "rb")
 
+    bot.send_animation(message.chat.id, animation)
     bot.send_message(message.chat.id, reply)
-    sleep(3)
-    #bot.send_message(message.chat.id, "Какое аниме ты ищешь?")
+
+
+@bot.message_handler(commands=['help'])
+def help_message(message):
+    reply = commands.reply_handler(message.text)
+
+    bot.send_message(message.chat.id, reply, parse_mode='html')
+
+
+@bot.message_handler(commands=['setwelcomesticker'])
+def set_welcome_sticker(message):
+    bot.send_message(message.chat.id, "Done!")
 
 bot.polling(none_stop=True, interval=0)
