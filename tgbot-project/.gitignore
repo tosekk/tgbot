@@ -1,0 +1,4 @@
+#Ignore token
+bot_token.py
+*.pyc
+/__pycache__
