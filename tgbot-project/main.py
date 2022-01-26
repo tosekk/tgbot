@@ -19,11 +19,6 @@ files_path = f'https://api.telegram.org/file/bot{bot_token.token}/'
 #Commands Handler Class
 cmd_handler = CommandsHandler()
 
-#Files Paths
-bot.g_animation = "static/g_animation.gif"
-bot.g_sticker = "static/g_sticker.webp"
-bot.g_photo = "static/g_photo.png"
-
 #Global Flags
 bot.isSticker = False
 bot.isAnimation = True
@@ -35,16 +30,16 @@ def welcome_message(message):
     reply = cmd_handler.reply_handler(message.text)    
     
     if bot.isSticker:
-        with open(bot.g_sticker, 'rb') as s:
-            bot.send_sticker(message.chat.id, s)
+        with open("static/g_sticker.webp", 'rb') as sticker:
+            bot.send_sticker(message.chat.id, sticker)
             bot.send_message(message.chat.id, reply)
     elif bot.isAnimation:
-        with open(bot.g_photo, 'rb') as s:
-            bot.send_animation(message.chat.id, bot.g_animation)
+        with open("static/g_animation.gif", 'rb') as anim:
+            bot.send_animation(message.chat.id, anim)
             bot.send_message(message.chat.id, reply)
     elif bot.isPhoto:
-        with open(bot.g_photo, 'rb') as s:
-            bot.send_photo(message.chat.id, bot.g_photo)
+        with open("static/g_photo.png", 'rb') as photo:
+            bot.send_photo(message.chat.id, photo)
             bot.send_message(message.chat.id, reply)
     elif bot.isTextOnly:
         bot.send_message(message.chat.id, reply)
@@ -59,30 +54,17 @@ def help_message(message):
 
 @bot.message_handler(commands=['welcomeconfig'])
 def init_welcome_sticker(message) -> None:
-    #sticker_keyboard = types.InlineKeyboardMarkup()
-    #anim_key = types.InlineKeyboardButton(text="Выбрать анимацию...", callback_data='animation')
-    #sticker_key = types.InlineKeyboardButton(text="Выбрать стикер...", callback_data='sticker')
-    #sticker_keyboard.add(anim_key, sticker_key, row_width=2)
-
-    bot.send_message(message.chat.id, "Выберите тип приветствия", reply_markup=__init_greeting_keyboard())
+    bot.send_message(message.chat.id, "Выберите тип приветствия", 
+        reply_markup=__init_greeting_keyboard())
 
 def set_welcome_animation(message):
-    g_animation = cmd_handler.file_handler(bot, message, bot_token.token)
-
-    with open(bot.g_animation, 'wb') as f:
-        f.write(g_animation)
+    cmd_handler.file_handler(bot, message, bot_token.token)
 
 def set_welcome_sticker(message) -> None:
-    g_sticker = cmd_handler.file_handler(bot, message, bot_token.token)
-
-    with open(bot.g_sticker, 'wb') as f:
-        f.write(g_sticker)
+    cmd_handler.file_handler(bot, message, bot_token.token)
 
 def set_welcome_photo(message) -> None:
-    g_photo = cmd_handler.file_handler(bot, message, bot_token.token)
-
-    with open(bot.g_photo, 'wb') as f:
-        f.write(g_photo)
+    cmd_handler.file_handler(bot, message, bot_token.token)
 
 def set_welcome_text(message) -> None:
     print("Hi")
@@ -95,12 +77,17 @@ def __init_greeting_keyboard():
     """
     greeting_keyboard = types.InlineKeyboardMarkup()
 
-    anim_key = types.InlineKeyboardButton(text="Анимация + Текст", callback_data="animation")
-    sticker_key = types.InlineKeyboardButton(text="Стикер + Текст", callback_data="sticker")
-    photo_key = types.InlineKeyboardButton(text="Фото + Текст", callback_data="photo")
-    text_key = types.InlineKeyboardButton(text="Толкьо текст", callback_data="text_only")
+    anim_key = types.InlineKeyboardButton(text="Анимация + Текст", 
+        callback_data="animation")
+    sticker_key = types.InlineKeyboardButton(text="Стикер + Текст", 
+        callback_data="sticker")
+    photo_key = types.InlineKeyboardButton(text="Фото + Текст", 
+        callback_data="photo")
+    text_key = types.InlineKeyboardButton(text="Толкьо текст", 
+        callback_data="text_only")
     
-    greeting_keyboard.add(anim_key, sticker_key, photo_key, text_key, row_width=2)
+    greeting_keyboard.add(anim_key, sticker_key, photo_key, 
+                          text_key, row_width=2)
 
     return greeting_keyboard
 
@@ -114,16 +101,22 @@ def search_anime(message):
 def callback_query(call):
     bot.answer_callback_query(call.id)
     if (call.data == "animation"):
-        bot.send_message(call.message.chat.id, "Отправьте мне анимацию в .gif формате :3")
+        bot.send_message(call.message.chat.id, 
+                        "Отправьте мне анимацию в .gif формате :3")
         bot.register_next_step_handler(call.message, set_welcome_animation)
+
     if (call.data == "sticker"):
         bot.send_message(call.message.chat.id, "Отправьте мне стикер :3")
         bot.register_next_step_handler(call.message, set_welcome_sticker)
+
     if (call.data == "photo"):
-        bot.send_message(call.message.chat.id, "Отправьте мне фото в .png формате :3")
+        bot.send_message(call.message.chat.id, 
+                        "Отправьте мне фото в .png формате :3")
         bot.register_next_step_handler(call.message, set_welcome_photo)
+
     if (call.data == "text_only"):
-        bot.send_message(call.message.chat.id, "Отправьте мне текст сообщением :3")
+        bot.send_message(call.message.chat.id, 
+                        "Отправьте мне текст сообщением :3")
         bot.register_next_step_handler(call.message, set_welcome_text)
 
 

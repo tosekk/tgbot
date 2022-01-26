@@ -64,25 +64,25 @@ class CommandsHandler():
         photos_path = f'https://api.telegram.org/file/bot{token}/'
 
         if message.animation:
-            file_info = bot.get_file(message.sticker.file_id)
+            file_info = bot.get_file(message.animation.file_id)
             file = get(photos_path + file_info.file_path, allow_redirects=True)
-            with open(bot.g_animation, 'wb') as f:
+            with open("static/g_animation.gif", 'wb') as f:
                 f.write(file.content)
-            self.__file_prep(bot, message, bot.g_animation, 0)
+            self.__file_prep(bot, message, "static/g_animation.gif", 0)
 
         if message.sticker:
             file_info = bot.get_file(message.sticker.file_id)
             file = get(photos_path + file_info.file_path, allow_redirects=True)
-            with open(bot.g_sticker, 'wb') as f:
+            with open("static/g_sticker.webp", 'wb') as f:
                 f.write(file.content)
-            self.__file_prep(bot, message, bot.g_sticker, 1)
+            self.__file_prep(bot, message, "static/g_sticker.webp", 1)
             
         if message.photo:
-            file_info = bot.get_file(message.sticker.file_id)
+            file_info = bot.get_file(message.photo.file_id)
             file = get(photos_path + file_info.file_path, allow_redirects=True)
-            with open(bot.g_photo, 'wb') as f:
+            with open("static/g_photo.png", 'wb') as f:
                 f.write(file.content)
-            self.__file_prep(bot, message, bot.g_photo, 2)
+            self.__file_prep(bot, message, "static/g_photo.png", 2)
 
     #Private Methods
     def __greeting_time(self):
@@ -98,7 +98,7 @@ class CommandsHandler():
         
         return selected
     
-    def __file_prep(self, bot: TeleBot, message: Message, g_file: str, f_type: int) -> None:
+    def __file_prep(self, bot: TeleBot, message: Message, g_file: str, f_type: int):
         """Handles greeting files sent by the user
 
         Args:
@@ -127,7 +127,7 @@ class CommandsHandler():
                 bot.isPhoto = False
                 bot.isTextOnly = False
                 bot.send_sticker(message.chat.id, file)
-        if f_type == 1:
+        if f_type == 2:
             with open(g_file, 'rb') as file:
                 bot.isPhoto = True
                 bot.isSticker = False
