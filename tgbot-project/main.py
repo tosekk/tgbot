@@ -20,9 +20,9 @@ files_path = f'https://api.telegram.org/file/bot{bot_token.token}/'
 cmd_handler = CommandsHandler()
 
 #Files Paths
-g_animation = open("static/g_animation.gif", "rb")
-g_sticker = open("static/g_sticker.webp", "rb")
-g_photo = open("static/g_photo.png", "rb")
+bot.g_animation = "static/g_animation.gif"
+bot.g_sticker = "static/g_sticker.webp"
+bot.g_photo = "static/g_photo.png"
 
 #Global Flags
 bot.isSticker = False
@@ -35,14 +35,17 @@ def welcome_message(message):
     reply = cmd_handler.reply_handler(message.text)    
     
     if bot.isSticker:
-        bot.send_sticker(message.chat.id, g_sticker)
-        bot.send_message(message.chat.id, reply)
+        with open(bot.g_sticker, 'rb') as s:
+            bot.send_sticker(message.chat.id, s)
+            bot.send_message(message.chat.id, reply)
     elif bot.isAnimation:
-        bot.send_animation(message.chat.id, g_animation)
-        bot.send_message(message.chat.id, reply)
+        with open(bot.g_photo, 'rb') as s:
+            bot.send_animation(message.chat.id, bot.g_animation)
+            bot.send_message(message.chat.id, reply)
     elif bot.isPhoto:
-        bot.send_photo(message.chat.id, g_photo)
-        bot.send_message(message.chat.id, reply)
+        with open(bot.g_photo, 'rb') as s:
+            bot.send_photo(message.chat.id, bot.g_photo)
+            bot.send_message(message.chat.id, reply)
     elif bot.isTextOnly:
         bot.send_message(message.chat.id, reply)
 
@@ -66,39 +69,23 @@ def init_welcome_sticker(message) -> None:
 def set_welcome_animation(message):
     g_animation = cmd_handler.file_handler(bot, message, bot_token.token)
 
-    _file_prep(message, g_animation, 0)
+    with open(bot.g_animation, 'wb') as f:
+        f.write(g_animation)
 
 def set_welcome_sticker(message) -> None:
     g_sticker = cmd_handler.file_handler(bot, message, bot_token.token)
 
-    _file_prep(message, g_sticker, 1)
+    with open(bot.g_sticker, 'wb') as f:
+        f.write(g_sticker)
 
 def set_welcome_photo(message) -> None:
-    g_sticker = cmd_handler.file_handler(bot, message, bot_token.token)
+    g_photo = cmd_handler.file_handler(bot, message, bot_token.token)
 
-    _file_prep(message, g_sticker, 2)
+    with open(bot.g_photo, 'wb') as f:
+        f.write(g_photo)
 
 def set_welcome_text(message) -> None:
     print("Hi")
-
-def _file_prep(message: Message, g_file: str, f_type: int) -> None:
-    """Handles greeting files sent by the user
-
-    Args:
-        message (Message): File sent by the user
-        g_file (str): File path
-        f_type (int): 0 - animation, 1 - sticker, 2 - photo
-    """
-    files = ['Анимация', 'Стикер', 'Фото']
-    ending = ['а', '', 'о']
-
-    bot.send_message(message.chat.id, f"{files[f_type]} загружается...")
-    sleep(3)
-    bot.send_message(message.chat.id, f"{files[f_type]} установлен{ending[f_type]}!")
-    
-    with open(g_file, 'rb') as file:
-        bot.isAnimation = True
-        bot.send_animation(message.chat.id, file)
 
 def __init_greeting_keyboard():
     """Initialize greeting control keyboard
