@@ -1,5 +1,16 @@
 #Standard Modules
 from datetime import datetime as dt
+from requests import get
+
+#Third-Party Modules
+from telebot import TeleBot
+from telebot.types import Message
+
+
+#Files paths
+g_animation = 'static/g_animation.gif'
+g_sticker = 'static/g_sticker.webp'
+g_photo = 'static/g_photo.png'
 
 
 class CommandsHandler():
@@ -54,6 +65,30 @@ class CommandsHandler():
                         text += line
         return text
 
+    def file_handler(self, bot: TeleBot, message: Message, token: str) -> str:
+        photos_path = f'https://api.telegram.org/file/bot{token}/'
+
+        if message.animation:
+            file_info = bot.get_file(message.sticker.file_id)
+            file = get(photos_path + file_info.file_path, allow_redirects=True)
+            with open(g_animation, 'wb') as f:
+                f.write(file.content)
+            return g_animation
+        if message.sticker:
+            file_info = bot.get_file(message.sticker.file_id)
+            file = get(photos_path + file_info.file_path, allow_redirects=True)
+            with open(g_sticker, 'wb') as f:
+                f.write(file.content)
+
+            return g_sticker
+        if message.photo:
+            file_info = bot.get_file(message.sticker.file_id)
+            file = get(photos_path + file_info.file_path, allow_redirects=True)
+            with open(g_photo, 'wb') as f:
+                f.write(file.content)
+            return g_photo
+
+    #Private Methods
     def __greeting_time(self):
         current_time = dt.now()
         current_hour = current_time.hour
