@@ -22,10 +22,7 @@ anime_search = MALSearch()
 cmd_handler = CommandsHandler()
 
 #Global Flags
-bot.isSticker = False
-bot.isAnimation = True
-bot.isPhoto = False
-bot.isTextOnly = False
+bot.g_type = "animation"
 bot.page_num = 0
 
 
@@ -33,19 +30,19 @@ bot.page_num = 0
 def welcome_message(message: Message) -> None:
     reply = cmd_handler.reply_handler(message.text)    
     
-    if bot.isSticker:
+    if bot.g_type == "sticker":
         with open("static/g_sticker.webp", 'rb') as sticker:
             bot.send_sticker(message.chat.id, sticker)
             bot.send_message(message.chat.id, reply)
-    elif bot.isAnimation:
+    elif bot.g_type == "animation":
         with open("static/g_animation.gif", 'rb') as anim:
             bot.send_animation(message.chat.id, anim)
             bot.send_message(message.chat.id, reply)
-    elif bot.isPhoto:
+    elif bot.g_type == "photo":
         with open("static/g_photo.png", 'rb') as photo:
             bot.send_photo(message.chat.id, photo)
             bot.send_message(message.chat.id, reply)
-    elif bot.isTextOnly:
+    elif bot.g_type == "text_only":
         bot.send_message(message.chat.id, reply)
 
 
@@ -62,32 +59,32 @@ def show_greeting_keyboard(message: Message) -> None:
                      reply_markup=__init_greeting_keyboard())
 
 
-def set_welcome_animation(message: Message) -> None:
-    cmd_handler.file_handler(bot, message, bot_token.token)
+def set_welcome_animation(message: Message, call_data: str) -> None:
+    cmd_handler.file_handler(bot, message, call_data, bot_token.token)
     
     text_keyboard = __init_text_keyboard()
     bot.send_message(message.chat.id, "Хотите ли вы изменить текст?",
                      reply_markup=text_keyboard)
 
 
-def set_welcome_sticker(message: Message) -> None:
-    cmd_handler.file_handler(bot, message, bot_token.token)
+def set_welcome_sticker(message: Message, call_data: str) -> None:
+    cmd_handler.file_handler(bot, message, call_data, bot_token.token)
     
     text_keyboard = __init_text_keyboard()
     bot.send_message(message.chat.id, "Хотите ли вы изменить текст?",
                      reply_markup=text_keyboard)
 
 
-def set_welcome_photo(message: Message) -> None:
-    cmd_handler.file_handler(bot, message, bot_token.token)
+def set_welcome_photo(message: Message, call_data: str) -> None:
+    cmd_handler.file_handler(bot, message, call_data, bot_token.token)
     
     text_keyboard = __init_text_keyboard()
     bot.send_message(message.chat.id, "Хотите ли вы изменить текст?",
                      reply_markup=text_keyboard)
 
 
-def set_welcome_text(message: Message) -> None:
-    cmd_handler.change_greeting(bot, message.text)
+def set_welcome_text(message: Message, call_data: str="with_file") -> None:
+    cmd_handler.change_greeting(bot, message.text, call_data)
     bot.send_message(message.chat.id, "Приветствие изменено!")
 
 
@@ -117,8 +114,8 @@ def __init_greeting_keyboard() -> InlineKeyboardMarkup:
 def __init_text_keyboard() -> InlineKeyboardMarkup:
     text_keyboard = InlineKeyboardMarkup()
     
-    yes_key =  InlineKeyboardButton(text="", callback_data="yes")
-    no_key = InlineKeyboardButton(text="", callback_data="no")
+    yes_key =  InlineKeyboardButton(text="Да", callback_data="yes")
+    no_key = InlineKeyboardButton(text="Нет", callback_data="no")
     
     text_keyboard.add(yes_key, no_key, row_width=2)
     
@@ -279,21 +276,25 @@ def __greeting_query(call: CallbackQuery) -> None:
         bot.edit_message_reply_markup(call.message.chat.id, call.message.id)
         bot.send_message(call.message.chat.id, 
                         "Отправьте мне анимацию в .gif формате :3")
-        bot.register_next_step_handler(call.message, set_welcome_animation)
+        bot.register_next_step_handler(call.message, set_welcome_animation,
+                                       call.data)
     if (call.data == "sticker"):
         bot.edit_message_reply_markup(call.message.chat.id, call.message.id)
         bot.send_message(call.message.chat.id, "Отправьте мне стикер :3")
-        bot.register_next_step_handler(call.message, set_welcome_sticker)
+        bot.register_next_step_handler(call.message, set_welcome_sticker,
+                                       call.data)
     if (call.data == "photo"):
         bot.edit_message_reply_markup(call.message.chat.id, call.message.id)
         bot.send_message(call.message.chat.id, 
                         "Отправьте мне фото в .png формате :3")
-        bot.register_next_step_handler(call.message, set_welcome_photo)
+        bot.register_next_step_handler(call.message, set_welcome_photo,
+                                       call.data)
     if (call.data == "text_only"):
         bot.edit_message_reply_markup(call.message.chat.id, call.message.id)
         bot.send_message(call.message.chat.id, 
                         "Отправьте мне текст сообщением :3")
-        bot.register_next_step_handler(call.message, set_welcome_text)
+        bot.register_next_step_handler(call.message, set_welcome_text,
+                                       call.data)
 
       
 def __page_query(call: CallbackQuery) -> None:
@@ -357,9 +358,11 @@ def __greeting_text_query(call: CallbackQuery) -> None:
     """
     if (call.data == "yes"):
         bot.register_next_step_handler(call.message, set_welcome_text)
+        bot.send_message(call.message.chat.id, "Напиши новое приветствие!")
+        sleep(2)
         bot.edit_message_reply_markup(call.message.chat.id, call.message.id)
     if (call.data == "no"):
-        bot.register_next_step_handler(call.message, set_welcome_text)
+        bot.send_message(call.message.chat.id, "Хорошо :3")
         bot.edit_message_reply_markup(call.message.chat.id, call.message.id)
 
 

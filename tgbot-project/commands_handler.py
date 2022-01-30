@@ -34,15 +34,14 @@ class CommandsHandler:
 
         return text
     
-    def change_greeting(self, bot: TeleBot, message_text: str) -> None:
+    def change_greeting(self, bot: TeleBot, message_text: str,
+                        call_data: str) -> None:
         text = message_text.split("\n")
 
         with open("static/texts.txt", "r", encoding="utf-8") as f:
             file_data = f.readlines()
-            bot.isPhoto = tf[1]
-            bot.isSticker = tf[1]
-            bot.isAnimation = tf[1]
-            bot.isTextOnly = tf[0]
+            if call_data == "text_only":
+                bot.g_type == call_data
 
         file_data = self.__greeting_prep(text, file_data)
 
@@ -74,7 +73,8 @@ class CommandsHandler:
 
         return text
 
-    def file_handler(self, bot: TeleBot, message: Message, token: str) -> None:
+    def file_handler(self, bot: TeleBot, message: Message, 
+                     call_data: str, token: str) -> None:
         """Handles files sent by the user. Changes welcome images and text.
 
         Args:
@@ -87,21 +87,21 @@ class CommandsHandler:
         """
         photos_path = f'https://api.telegram.org/file/bot{token}/'
 
-        if message.animation:
+        if call_data == "animation":
             file_info = bot.get_file(message.animation.file_id)
             file = get(photos_path + file_info.file_path, allow_redirects=True)
             with open("static/g_animation.gif", 'wb') as f:
                 f.write(file.content)
             self.__g_file_prep(bot, message, "static/g_animation.gif", 0)
 
-        if message.sticker:
+        if call_data == "sticker":
             file_info = bot.get_file(message.sticker.file_id)
             file = get(photos_path + file_info.file_path, allow_redirects=True)
             with open("static/g_sticker.webp", 'wb') as f:
                 f.write(file.content)
             self.__g_file_prep(bot, message, "static/g_sticker.webp", 1)
             
-        if message.photo:
+        if call_data == "photo":
             file_info = bot.get_file(message.photo.file_id)
             file = get(photos_path + file_info.file_path, allow_redirects=True)
             with open("static/g_photo.png", 'wb') as f:
@@ -180,22 +180,13 @@ class CommandsHandler:
         
         if f_type == 0:
             with open(g_file, 'rb') as file:
-                bot.isAnimation = tf[0]
-                bot.isSticker = tf[1]
-                bot.isPhoto = tf[1]
-                bot.isTextOnly = tf[1]
+                bot.g_type = "animation"
                 bot.send_animation(message.chat.id, file)
         if f_type == 1:
             with open(g_file, 'rb') as file:
-                bot.isSticker = tf[0]
-                bot.isAnimation = tf[1]
-                bot.isPhoto = tf[1]
-                bot.isTextOnly = tf[1]
+                bot.g_type = "sticker"
                 bot.send_sticker(message.chat.id, file)
         if f_type == 2:
             with open(g_file, 'rb') as file:
-                bot.isPhoto = tf[0]
-                bot.isSticker = tf[1]
-                bot.isAnimation = tf[1]
-                bot.isTextOnly = tf[1]
+                bot.g_type = "photo"
                 bot.send_photo(message.chat.id, file)
