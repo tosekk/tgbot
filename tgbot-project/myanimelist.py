@@ -208,6 +208,14 @@ class MALSearch:
 class MALOst:
     
     def search(self, url: str) -> list:
+        """Handles anime ost info gathering
+
+        Args:
+            url (str): Selected anime webpage
+
+        Returns:
+            list: List of soundtracks
+        """
         webpage = get(url)
         soup = BeautifulSoup(webpage.text, "lxml")
         
@@ -228,6 +236,15 @@ class MALOst:
 
     def __info_extraction(self, st_title_tags: ResultSet, 
                           st_artist_tags: ResultSet) -> list:
+        """Handles info extraction
+
+        Args:
+            st_title_tags (ResultSet): Soundtrack titles html tags
+            st_artist_tags (ResultSet): Soundtrack artists html tags
+
+        Returns:
+            list: List with nested ost title and artist lists
+        """
         st_titles = []
         st_artists = []
         
@@ -240,3 +257,51 @@ class MALOst:
                 st_artists.append(st_artist_tags[i].text)
         
         return [st_titles, st_artists]
+    
+
+class MALCast:
+    
+    def search(self, url: str) -> list:
+        """Handles info gathering on anime cast
+
+        Args:
+            url (str): Selected anime webpage
+
+        Returns:
+            list: List with nested characters and voice actors lists
+        """
+        webpage = get(url)
+        soup = BeautifulSoup(webpage.text, "lxml")
+        
+        characters_tags = soup.find_all("h3", class_="h3_characters_voice_actors")
+        actors_tags = soup.find_all("td", class_="va-t ar pl4 pr4")
+        
+        characters = []
+        actors = []
+        
+        for i in range(len(characters_tags)):
+            character = characters_tags[i].a.extract()
+            actor = actors_tags[i].a.extract()
+            characters.append([character['href'], character.text])
+            actors.append([actor['href'], actor.text])
+        
+        return [characters, actors]
+    
+
+class MALSummary:
+    
+    def search(self, url: str) -> str:
+        """Handles info gathering on synopsis
+
+        Args:
+            url (str): Selected anime webpage
+
+        Returns:
+            str: Synopsis text
+        """
+        webpage = get(url)
+        soup = BeautifulSoup(webpage.text, "lxml")
+        
+        summary_tags = soup.find_all("p", itemprop="description")
+        
+        return summary_tags[0].text

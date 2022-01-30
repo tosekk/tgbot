@@ -9,18 +9,23 @@ from telebot.types import (CallbackQuery, InlineKeyboardMarkup,
 #Local Modules
 import bot_token
 from greeting_handler import GreetingsHandler
-from myanimelist import MALRatings, MALSearch, MALOst
+from myanimelist import (MALRatings, MALSearch, MALOst, 
+                         MALCast, MALSummary)
 
 
 #Bot Setup
 bot = TeleBot(bot_token.token)
 files_path = f'https://api.telegram.org/file/bot{bot_token.token}/'
 
-#Commands Handler Class
+#Anime Commands Classes
 anime_ratings = MALRatings()
 anime_search = MALSearch()
 anime_ost = MALOst()
-cmd_handler = GreetingsHandler()
+anime_cast = MALCast()
+anime_summary = MALSummary()
+
+#Greetings Handler
+g_handler = GreetingsHandler()
 
 #Global Flags
 bot.g_type = "animation"
@@ -34,7 +39,7 @@ def welcome_message(message: Message) -> None:
     Args:
         message (Message): Message that contains the command
     """
-    reply = cmd_handler.reply_handler(message.text)    
+    reply = g_handler.reply_handler(message.text)    
     
     if bot.g_type == "sticker":
         with open("static/g_sticker.webp", 'rb') as sticker:
@@ -59,7 +64,7 @@ def help_message(message: Message) -> None:
     Args:
         message (Message): Message that contains the command
     """
-    reply = cmd_handler.reply_handler(message.text)
+    reply = g_handler.reply_handler(message.text)
 
     bot.send_message(message.chat.id, reply, parse_mode='html')
 
@@ -82,7 +87,7 @@ def __set_welcome_animation(message: Message, call_data: str) -> None:
         message (Message): Message
         call_data (str): Keyboard button call data
     """
-    cmd_handler.file_handler(bot, message, call_data, bot_token.token)
+    g_handler.file_handler(bot, message, call_data, bot_token.token)
     
     text_keyboard = __init_text_keyboard()
     bot.send_message(message.chat.id, "Хотите ли вы изменить текст?",
@@ -96,7 +101,7 @@ def __set_welcome_sticker(message: Message, call_data: str) -> None:
         message (Message): Message
         call_data (str): Keyboard button call data
     """
-    cmd_handler.file_handler(bot, message, call_data, bot_token.token)
+    g_handler.file_handler(bot, message, call_data, bot_token.token)
     
     text_keyboard = __init_text_keyboard()
     bot.send_message(message.chat.id, "Хотите ли вы изменить текст?",
@@ -110,7 +115,7 @@ def __set_welcome_photo(message: Message, call_data: str) -> None:
         message (Message): Message
         call_data (str): Keyboard button call data
     """
-    cmd_handler.file_handler(bot, message, call_data, bot_token.token)
+    g_handler.file_handler(bot, message, call_data, bot_token.token)
     
     text_keyboard = __init_text_keyboard()
     bot.send_message(message.chat.id, "Хотите ли вы изменить текст?",
@@ -125,7 +130,7 @@ def __set_welcome_text(message: Message, call_data: str="with_file") -> None:
         call_data (str, optional): Keyboard button call data. 
         Defaults to "with_file".
     """
-    cmd_handler.change_greeting(bot, message.text, call_data)
+    g_handler.change_greeting(bot, message.text, call_data)
     bot.send_message(message.chat.id, "Приветствие изменено!")
 
 
@@ -179,16 +184,19 @@ def ask_anime_title(message: Message) -> None:
     bot.send_message(message.chat.id, 
                      "Напишите название аниме(на английском)")
     if message.text == "/animesearch":
-        bot.register_next_step_handler(message, show_search_result)
+        bot.register_next_step_handler(message, __show_search_result)
     elif message.text == "/animeost":
-        bot.register_next_step_handler(message, select_anime)
+        bot.register_next_step_handler(message, __select_anime,
+                                       message.text)
     elif message.text == "/animecast":
-        bot.register_next_step_handler(message, show_search_result)
+        bot.register_next_step_handler(message, __select_anime,
+                                       message.text)
     elif message.text == "/animesummary":
-        bot.register_next_step_handler(message, select_anime)
+        bot.register_next_step_handler(message, __select_anime,
+                                       message.text)
 
    
-def show_search_result(message: Message) -> None:
+def __show_search_result(message: Message) -> None:
     """Handles showing search results
 
     Args:
@@ -205,7 +213,13 @@ def show_search_result(message: Message) -> None:
     bot.send_message(message.chat.id, text, parse_mode="html")
 
 
-def select_anime(message: Message) -> None:
+def __select_anime(message: Message, command: str) -> None:
+    """Handles anime selection from a list of found anime titles
+
+    Args:
+        message (Message): Message
+        command (str): Anime command
+    """
     title_url = anime_search.search(message.text)
     
     text = ""
@@ -217,10 +231,22 @@ def select_anime(message: Message) -> None:
     bot.send_message(message.chat.id, "<b>Результаты поиска</b>",
                      parse_mode="html")
     bot.send_message(message.chat.id, text)
-    bot.register_next_step_handler(message, __search_ost, title_url)
+    
+    if command == "/animeost":
+        bot.register_next_step_handler(message, __search_ost, title_url)
+    if command == "/animecast":
+        bot.register_next_step_handler(message, __search_cast, title_url)
+    if command == "/animesummary":
+        bot.register_next_step_handler(message, __search_summary, title_url)
 
    
-def __search_ost(message: Message, titles_urls: list):
+def __search_ost(message: Message, titles_urls: list) -> None:
+    """Handles anime soundtrack search
+
+    Args:
+        message (Message): Message
+        titles_urls (list): List of found anime titles and their urls
+    """
     url = titles_urls[1][int(message.text) - 1]
     soundtracks = anime_ost.search(url)
     
@@ -235,6 +261,47 @@ def __search_ost(message: Message, titles_urls: list):
     bot.send_message(message.chat.id, text)
 
 
+def __search_cast(message: Message, titles_urls: list) -> None:
+    """Handles anime cast search
+
+    Args:
+        message (Message): Message
+        titles_urls (list): List of found anime titles and their urls
+    """
+    url = titles_urls[1][int(message.text) - 1]
+    cast = anime_cast.search(url)
+    
+    text = ""
+    
+    for i in range(len(cast[0])):
+        ch_name = cast[0][i][1]
+        ch_url = cast[0][i][0]
+        a_name = cast[1][i][1]
+        a_url = cast[1][i][0]
+        ch_sentence = f"<a href=\"{ch_url}\">{ch_name}</a>"
+        a_sentence = f" - <a href=\"{a_url}\"><b>{a_name}</b></a>\n"
+        text += ch_sentence + a_sentence
+
+    bot.send_message(message.chat.id,
+                     f"<b>Актеры {titles_urls[0][int(message.text) - 1]}</b>",
+                     parse_mode="html")
+    bot.send_message(message.chat.id, text, parse_mode="html")
+
+
+def __search_summary(message: Message, titles_urls: list) -> None:
+    """Handles anime summary seach
+
+    Args:
+        message (Message): Message
+        titles_urls (list): List of found anime titles and their urls
+    """
+    url = titles_urls[1][int(message.text) - 1]
+    summary = anime_summary.search(url)
+    
+    bot.send_message(message.chat.id, "<b>Синопсис</b>", parse_mode="html")
+    bot.send_message(message.chat.id, summary)
+    
+
 @bot.message_handler(["animetop"])
 def show_toptype_keyboard(message: Message) -> None:
     """Handles rating type keyboard
@@ -247,7 +314,7 @@ def show_toptype_keyboard(message: Message) -> None:
                      reply_markup=toptype_keyboard)
 
     
-def show_anime_ratings(message: Message, call_data: str) -> None:
+def __show_anime_ratings(message: Message, call_data: str) -> None:
     """Handles showing user the ratings
 
     Args:
@@ -261,7 +328,7 @@ def show_anime_ratings(message: Message, call_data: str) -> None:
     
     with open(ratings_file, "r", encoding="utf-8") as file:
         bot.content = file.readlines()
-        page_message(message, bot.content, 0)
+        __page_message(message, bot.content, 0)
 
 
 def __init_toptype_keyboard() -> InlineKeyboardMarkup:
@@ -311,7 +378,7 @@ def __toptype_message(call_data: str) -> str:
 
 
 #Страничные сообщения
-def page_message(message: Message, text: list, increment: int) -> None:
+def __page_message(message: Message, text: list, increment: int) -> None:
     """Handles page function for the message
 
     Args:
@@ -442,16 +509,16 @@ def __page_query(call: CallbackQuery) -> None:
     """
     if (call.data == "first"):
         bot.delete_message(call.message.chat.id, call.message.id)
-        page_message(call.message, bot.content, 0)
+        __page_message(call.message, bot.content, 0)
     if (call.data == "previous"):
         bot.delete_message(call.message.chat.id, call.message.id)
-        page_message(call.message, bot.content, -1)
+        __page_message(call.message, bot.content, -1)
     if (call.data == "next"):
         bot.delete_message(call.message.chat.id, call.message.id)
-        page_message(call.message, bot.content, 1)
+        __page_message(call.message, bot.content, 1)
     if (call.data == "last"):
         bot.delete_message(call.message.chat.id, call.message.id)
-        page_message(call.message, bot.content, 2)
+        __page_message(call.message, bot.content, 2)
 
        
 def __rating_query(call: CallbackQuery) -> None:
@@ -462,28 +529,28 @@ def __rating_query(call: CallbackQuery) -> None:
     """
     if (call.data == "alltime"):
         bot.send_message(call.message.chat.id, "Собираю информацию...")
-        show_anime_ratings(call.message, call.data)
+        __show_anime_ratings(call.message, call.data)
         sleep(2)
         bot.edit_message_reply_markup(call.message.chat.id, call.message.id)
     if (call.data == "popular"):
         bot.send_message(call.message.chat.id, "Собираю информацию...")
-        show_anime_ratings(call.message, call.data)
+        __show_anime_ratings(call.message, call.data)
         sleep(2)
         bot.edit_message_reply_markup(call.message.chat.id, call.message.id)
     if (call.data == "airing"):
         bot.send_message(call.message.chat.id, "Собираю информацию...")
-        show_anime_ratings(call.message, call.data)
+        __show_anime_ratings(call.message, call.data)
         sleep(2)
         bot.edit_message_reply_markup(call.message.chat.id, call.message.id)
     if (call.data == "upcoming"):
         bot.send_message(call.message.chat.id, "Собираю информацию...")
-        show_anime_ratings(call.message, call.data)
+        __show_anime_ratings(call.message, call.data)
         sleep(2)
         bot.edit_message_reply_markup(call.message.chat.id, call.message.id)
     if (call.data == "favourite"):
         bot.send_message(call.message.chat.id, "Собираю информацию...")
         sleep(2)
-        show_anime_ratings(call.message, call.data)
+        __show_anime_ratings(call.message, call.data)
         bot.edit_message_reply_markup(call.message.chat.id, call.message.id)
 
 
