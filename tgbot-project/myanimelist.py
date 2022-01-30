@@ -262,6 +262,7 @@ class MALOst:
 class MALCast:
     
     def search(self, url: str) -> list:
+<<<<<<< HEAD
         """Handles info gathering on anime cast
 
         Args:
@@ -270,6 +271,8 @@ class MALCast:
         Returns:
             list: List with nested characters and voice actors lists
         """
+=======
+>>>>>>> dad4c0ec0ad1104d5ec13b668d0db7d728e07491
         webpage = get(url)
         soup = BeautifulSoup(webpage.text, "lxml")
         
@@ -290,6 +293,7 @@ class MALCast:
 
 class MALSummary:
     
+<<<<<<< HEAD
     def search(self, url: str) -> str:
         """Handles info gathering on synopsis
 
@@ -299,6 +303,9 @@ class MALSummary:
         Returns:
             str: Synopsis text
         """
+=======
+    def search(self, url: str) -> list:
+>>>>>>> dad4c0ec0ad1104d5ec13b668d0db7d728e07491
         webpage = get(url)
         soup = BeautifulSoup(webpage.text, "lxml")
         
