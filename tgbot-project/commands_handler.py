@@ -8,9 +8,11 @@ from telebot import TeleBot
 from telebot.types import Message
 
 
+#Flag Variable
 tf = [True, False]
 
-class CommandsHandler():
+
+class CommandsHandler:
     """
         Handles command messages and operations that are performed
         on them.
@@ -40,7 +42,7 @@ class CommandsHandler():
             bot.isPhoto = tf[1]
             bot.isSticker = tf[1]
             bot.isAnimation = tf[1]
-            bot.isTextOnly = True
+            bot.isTextOnly = tf[0]
 
         file_data = self.__greeting_prep(text, file_data)
 
@@ -90,21 +92,21 @@ class CommandsHandler():
             file = get(photos_path + file_info.file_path, allow_redirects=True)
             with open("static/g_animation.gif", 'wb') as f:
                 f.write(file.content)
-            self.__file_prep(bot, message, "static/g_animation.gif", 0)
+            self.__g_file_prep(bot, message, "static/g_animation.gif", 0)
 
         if message.sticker:
             file_info = bot.get_file(message.sticker.file_id)
             file = get(photos_path + file_info.file_path, allow_redirects=True)
             with open("static/g_sticker.webp", 'wb') as f:
                 f.write(file.content)
-            self.__file_prep(bot, message, "static/g_sticker.webp", 1)
+            self.__g_file_prep(bot, message, "static/g_sticker.webp", 1)
             
         if message.photo:
             file_info = bot.get_file(message.photo.file_id)
             file = get(photos_path + file_info.file_path, allow_redirects=True)
             with open("static/g_photo.png", 'wb') as f:
                 f.write(file.content)
-            self.__file_prep(bot, message, "static/g_photo.png", 2)
+            self.__g_file_prep(bot, message, "static/g_photo.png", 2)
 
     #Greeting Text Methods
     def __greeting_time(self) -> int:
@@ -118,7 +120,7 @@ class CommandsHandler():
 
         if 6 < current_hour < 12:
             selected = 0
-        elif 12 < current_hour < 21:
+        elif 12 <= current_hour < 21:
             selected = 1
         elif 21 < current_hour or current_hour < 6:
             selected = 2
@@ -159,8 +161,8 @@ class CommandsHandler():
         return file_data
     
     #File Methods
-    def __file_prep(self, bot: TeleBot, message: Message, 
-                    g_file: str, f_type: int):
+    def __g_file_prep(self, bot: TeleBot, message: Message, 
+                    g_file: str, f_type: int) -> None:
         """Handles greeting files sent by the user
 
         Args:
