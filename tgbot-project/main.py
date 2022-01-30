@@ -8,8 +8,8 @@ from telebot.types import (CallbackQuery, InlineKeyboardMarkup,
 
 #Local Modules
 import bot_token
-from commands_handler import CommandsHandler
-from myanimelist import MALRatings, MALSearch
+from greeting_handler import GreetingsHandler
+from myanimelist import MALRatings, MALSearch, MALOst
 
 
 #Bot Setup
@@ -19,7 +19,8 @@ files_path = f'https://api.telegram.org/file/bot{bot_token.token}/'
 #Commands Handler Class
 anime_ratings = MALRatings()
 anime_search = MALSearch()
-cmd_handler = CommandsHandler()
+anime_ost = MALOst()
+cmd_handler = GreetingsHandler()
 
 #Global Flags
 bot.g_type = "animation"
@@ -28,6 +29,11 @@ bot.page_num = 0
 
 @bot.message_handler(commands=['start'])
 def welcome_message(message: Message) -> None:
+    """Handles welcome message
+
+    Args:
+        message (Message): Message that contains the command
+    """
     reply = cmd_handler.reply_handler(message.text)    
     
     if bot.g_type == "sticker":
@@ -48,6 +54,11 @@ def welcome_message(message: Message) -> None:
 
 @bot.message_handler(commands=['help'])
 def help_message(message: Message) -> None:
+    """Handles help message
+
+    Args:
+        message (Message): Message that contains the command
+    """
     reply = cmd_handler.reply_handler(message.text)
 
     bot.send_message(message.chat.id, reply, parse_mode='html')
@@ -55,11 +66,22 @@ def help_message(message: Message) -> None:
 
 @bot.message_handler(commands=['welcomeconfig'])
 def show_greeting_keyboard(message: Message) -> None:
+    """Handles greeting configuration
+
+    Args:
+        message (Message): Message that contains the command
+    """
     bot.send_message(message.chat.id, "Выберите тип приветствия", 
                      reply_markup=__init_greeting_keyboard())
 
 
-def set_welcome_animation(message: Message, call_data: str) -> None:
+def __set_welcome_animation(message: Message, call_data: str) -> None:
+    """Private method that handles greetings with animation
+
+    Args:
+        message (Message): Message
+        call_data (str): Keyboard button call data
+    """
     cmd_handler.file_handler(bot, message, call_data, bot_token.token)
     
     text_keyboard = __init_text_keyboard()
@@ -67,7 +89,13 @@ def set_welcome_animation(message: Message, call_data: str) -> None:
                      reply_markup=text_keyboard)
 
 
-def set_welcome_sticker(message: Message, call_data: str) -> None:
+def __set_welcome_sticker(message: Message, call_data: str) -> None:
+    """Private method that handles greetings with sticker
+
+    Args:
+        message (Message): Message
+        call_data (str): Keyboard button call data
+    """
     cmd_handler.file_handler(bot, message, call_data, bot_token.token)
     
     text_keyboard = __init_text_keyboard()
@@ -75,7 +103,13 @@ def set_welcome_sticker(message: Message, call_data: str) -> None:
                      reply_markup=text_keyboard)
 
 
-def set_welcome_photo(message: Message, call_data: str) -> None:
+def __set_welcome_photo(message: Message, call_data: str) -> None:
+    """Private method that handles greetings with photo
+
+    Args:
+        message (Message): Message
+        call_data (str): Keyboard button call data
+    """
     cmd_handler.file_handler(bot, message, call_data, bot_token.token)
     
     text_keyboard = __init_text_keyboard()
@@ -83,7 +117,14 @@ def set_welcome_photo(message: Message, call_data: str) -> None:
                      reply_markup=text_keyboard)
 
 
-def set_welcome_text(message: Message, call_data: str="with_file") -> None:
+def __set_welcome_text(message: Message, call_data: str="with_file") -> None:
+    """Private method that handles greeting text
+
+    Args:
+        message (Message): Message
+        call_data (str, optional): Keyboard button call data. 
+        Defaults to "with_file".
+    """
     cmd_handler.change_greeting(bot, message.text, call_data)
     bot.send_message(message.chat.id, "Приветствие изменено!")
 
@@ -92,7 +133,7 @@ def __init_greeting_keyboard() -> InlineKeyboardMarkup:
     """Initialize greeting control keyboard
 
     Returns:
-        InlineKeyboardMarkup: Keyboard for the message sent by the command
+        InlineKeyboardMarkup: Keyboard
     """
     greeting_keyboard = InlineKeyboardMarkup()
 
@@ -112,6 +153,11 @@ def __init_greeting_keyboard() -> InlineKeyboardMarkup:
 
 
 def __init_text_keyboard() -> InlineKeyboardMarkup:
+    """Handles greeting text config question keyboard
+
+    Returns:
+        InlineKeyboardMarkup: Keyboard
+    """
     text_keyboard = InlineKeyboardMarkup()
     
     yes_key =  InlineKeyboardButton(text="Да", callback_data="yes")
@@ -122,8 +168,79 @@ def __init_text_keyboard() -> InlineKeyboardMarkup:
     return text_keyboard
 
 
+@bot.message_handler(commands=['animesearch', 'animeost', 
+                               'animecast', 'animesummary'])
+def ask_anime_title(message: Message) -> None:
+    """Handles anime search by title
+
+    Args:
+        message (Message): Message
+    """
+    bot.send_message(message.chat.id, 
+                     "Напишите название аниме(на английском)")
+    if message.text == "/animesearch":
+        bot.register_next_step_handler(message, show_search_result)
+    elif message.text == "/animeost":
+        bot.register_next_step_handler(message, select_anime)
+    elif message.text == "/animecast":
+        bot.register_next_step_handler(message, show_search_result)
+    elif message.text == "/animesummary":
+        bot.register_next_step_handler(message, select_anime)
+
+   
+def show_search_result(message: Message) -> None:
+    """Handles showing search results
+
+    Args:
+        message (Message): Message
+    """
+    results = anime_search.search(message.text)
+    text = ""
+    
+    for i in range(len(results[0])):
+        text += f"<a href=\"{results[1][i]}\">{results[0][i]}</a>\n"
+    
+    bot.send_message(message.chat.id, "<b>Результаты поиска</b>",
+                     parse_mode="html")
+    bot.send_message(message.chat.id, text, parse_mode="html")
+
+
+def select_anime(message: Message) -> None:
+    title_url = anime_search.search(message.text)
+    
+    text = ""
+    
+    for i in range(len(title_url[0])):
+        text += f"{i + 1}. {title_url[0][i]}\n"
+    text += f"Выберите один из вариантов(1-{len(title_url[0])})"
+    
+    bot.send_message(message.chat.id, "<b>Результаты поиска</b>",
+                     parse_mode="html")
+    bot.send_message(message.chat.id, text)
+    bot.register_next_step_handler(message, __search_ost, title_url)
+
+   
+def __search_ost(message: Message, titles_urls: list):
+    url = titles_urls[1][int(message.text) - 1]
+    soundtracks = anime_ost.search(url)
+    
+    text = ''
+    
+    for i in range(len(soundtracks)):
+        text += f"{i + 1}. {soundtracks[i]}\n"
+    
+    bot.send_message(message.chat.id, 
+                     f"<b>Саундтреки {titles_urls[0][int(message.text) - 1]}</b>",
+                     parse_mode="html")
+    bot.send_message(message.chat.id, text)
+
+
 @bot.message_handler(["animetop"])
 def show_toptype_keyboard(message: Message) -> None:
+    """Handles rating type keyboard
+    Args:
+        message (Message): Message
+    """
     toptype_keyboard = __init_toptype_keyboard()
 
     bot.send_message(message.chat.id, "Выберите рейтинг", 
@@ -131,6 +248,12 @@ def show_toptype_keyboard(message: Message) -> None:
 
     
 def show_anime_ratings(message: Message, call_data: str) -> None:
+    """Handles showing user the ratings
+
+    Args:
+        message (Message): Message
+        call_data (str): Keyboard call data
+    """
     rating_title = __toptype_message(call_data)
     bot.send_message(message.chat.id, rating_title, parse_mode="html")
     
@@ -145,7 +268,7 @@ def __init_toptype_keyboard() -> InlineKeyboardMarkup:
     """Creates the keyboard for animetop command
 
     Returns:
-        InlineKeyboardMarkup: Keyboard for the message sent by the command
+        InlineKeyboardMarkup: Keyboard
     """
     toptype_keyboard = InlineKeyboardMarkup()
 
@@ -167,6 +290,14 @@ def __init_toptype_keyboard() -> InlineKeyboardMarkup:
 
 
 def __toptype_message(call_data: str) -> str:
+    """Handles rating type responses
+
+    Args:
+        call_data (str): Keyboard call data
+
+    Returns:
+        str: Rating headline
+    """
     if call_data == "alltime":
         return "<b>Лучшие За Все Время</b>"
     if call_data == "upcoming":
@@ -181,6 +312,13 @@ def __toptype_message(call_data: str) -> str:
 
 #Страничные сообщения
 def page_message(message: Message, text: list, increment: int) -> None:
+    """Handles page function for the message
+
+    Args:
+        message (Message): Message
+        text (list): Message text
+        increment (int): Page increment value
+    """
     pages_keyboard = __init_pages_keyboard()
     
     page = __process_text(text, increment)
@@ -189,6 +327,15 @@ def page_message(message: Message, text: list, increment: int) -> None:
 
 
 def __process_text(text: list, increment: int) -> str:
+    """Handles message text processing
+
+    Args:
+        text (list): Message text
+        increment (int): Page increment value
+
+    Returns:
+        str: Message text
+    """
     page = []
     
     if increment == 0:
@@ -217,6 +364,11 @@ def __process_text(text: list, increment: int) -> str:
 
 
 def __init_pages_keyboard() -> InlineKeyboardMarkup:
+    """Handles pages' buttons
+
+    Returns:
+        InlineKeyboardMarkup: Keyboard
+    """
     pages_keyboard = InlineKeyboardMarkup()
     
     first = InlineKeyboardButton(text="1", callback_data="first")
@@ -227,21 +379,6 @@ def __init_pages_keyboard() -> InlineKeyboardMarkup:
     pages_keyboard.add(first, prev, next, last, row_width=4)
     
     return pages_keyboard
-
-
-@bot.message_handler(commands=['animesearch'])
-def ask_anime_title(message: Message) -> None:
-    bot.send_message(message.chat.id, 
-                     "Напишите название аниме(на английском)")
-    bot.register_next_step_handler(message, show_search_result)
-
-   
-def show_search_result(message: Message) -> None:
-    results = anime_search.search(message.text)
-        
-    bot.send_message(message.chat.id, "<b>Результаты поиска</b>",
-                     parse_mode="html")
-    bot.send_message(message.chat.id, "\n".join(results))
 
 
 @bot.callback_query_handler(func=lambda call: True)
@@ -276,24 +413,24 @@ def __greeting_query(call: CallbackQuery) -> None:
         bot.edit_message_reply_markup(call.message.chat.id, call.message.id)
         bot.send_message(call.message.chat.id, 
                         "Отправьте мне анимацию в .gif формате :3")
-        bot.register_next_step_handler(call.message, set_welcome_animation,
+        bot.register_next_step_handler(call.message, __set_welcome_animation,
                                        call.data)
     if (call.data == "sticker"):
         bot.edit_message_reply_markup(call.message.chat.id, call.message.id)
         bot.send_message(call.message.chat.id, "Отправьте мне стикер :3")
-        bot.register_next_step_handler(call.message, set_welcome_sticker,
+        bot.register_next_step_handler(call.message, __set_welcome_sticker,
                                        call.data)
     if (call.data == "photo"):
         bot.edit_message_reply_markup(call.message.chat.id, call.message.id)
         bot.send_message(call.message.chat.id, 
                         "Отправьте мне фото в .png формате :3")
-        bot.register_next_step_handler(call.message, set_welcome_photo,
+        bot.register_next_step_handler(call.message, __set_welcome_photo,
                                        call.data)
     if (call.data == "text_only"):
         bot.edit_message_reply_markup(call.message.chat.id, call.message.id)
         bot.send_message(call.message.chat.id, 
                         "Отправьте мне текст сообщением :3")
-        bot.register_next_step_handler(call.message, set_welcome_text,
+        bot.register_next_step_handler(call.message, __set_welcome_text,
                                        call.data)
 
       
@@ -357,7 +494,7 @@ def __greeting_text_query(call: CallbackQuery) -> None:
         call (CallbackQuery): InlineKeyboardButton callback
     """
     if (call.data == "yes"):
-        bot.register_next_step_handler(call.message, set_welcome_text)
+        bot.register_next_step_handler(call.message, __set_welcome_text)
         bot.send_message(call.message.chat.id, "Напиши новое приветствие!")
         sleep(2)
         bot.edit_message_reply_markup(call.message.chat.id, call.message.id)

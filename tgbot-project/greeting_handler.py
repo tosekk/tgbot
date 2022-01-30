@@ -12,7 +12,7 @@ from telebot.types import Message
 tf = [True, False]
 
 
-class CommandsHandler:
+class GreetingsHandler:
     """
         Handles command messages and operations that are performed
         on them.
@@ -36,6 +36,13 @@ class CommandsHandler:
     
     def change_greeting(self, bot: TeleBot, message_text: str,
                         call_data: str) -> None:
+        """Handles changing greeting text
+
+        Args:
+            bot (TeleBot): TeleBot instance
+            message_text (str): Message text
+            call_data (str): Keyboard call data
+        """
         text = message_text.split("\n")
 
         with open("static/texts.txt", "r", encoding="utf-8") as f:

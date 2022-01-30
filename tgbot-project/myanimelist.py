@@ -1,5 +1,4 @@
 #Third Party Modules
-from email.message import Message
 from bs4 import BeautifulSoup
 from bs4.element import ResultSet
 from requests import get
@@ -14,8 +13,18 @@ site_name = "myanimelist"
 
 
 class MALRatings:
+    """Handles rankings scraping from MyAnimeList
+    """
     
     def show_ratings(self, rating_type: str) -> str:
+        """Processes website and ranking table that is then sent to the bot
+
+        Args:
+            rating_type (str): Rating type: alltime, popular, etc.
+
+        Returns:
+            str: File path to the file with rankings listed
+        """
         file_mode = "w"
         
         if rating_type == "alltime":
@@ -44,6 +53,14 @@ class MALRatings:
         return file_path
     
     def __get_anime_ranking(self, ranking_table: ResultSet) -> list:
+        """Handles gathering anime positions from ranking table
+
+        Args:
+            ranking_table (ResultSet): BeautifulSoup filtered tags
+
+        Returns:
+            list: Ranking index
+        """
         rankings = []
         
         for element in ranking_table:
@@ -54,6 +71,14 @@ class MALRatings:
         return rankings     
     
     def __get_anime_title(self, ranking_table: ResultSet) -> list:
+        """Handles gathering anime titles from ranking table
+
+        Args:
+            ranking_table (ResultSet): BeautifulSoup filtered tags
+
+        Returns:
+            list: Anime titles
+        """
         titles = []
         
         for element in ranking_table:
@@ -64,6 +89,14 @@ class MALRatings:
         return titles
     
     def __get_anime_scores(self, ranking_table: ResultSet) -> list:
+        """Handles gathering anime scores from ranking table
+
+        Args:
+            ranking_table (ResultSet): BeautifulSoup filtered tags
+
+        Returns:
+            list: Anime scores
+        """
         scores = []
         
         for element in ranking_table:
@@ -76,41 +109,134 @@ class MALRatings:
     def __write_rankings(self, rating_type: str, file_mode: str, 
                          anime_rankings: list, anime_titles: list, 
                          anime_scores: list) -> str:
+        """Handles writing ranking table info to the file
+
+        Args:
+            rating_type (str): Rating type: alltime etc.
+            file_mode (str): File mode "w" or "a"
+            anime_rankings (list): Anime rankings
+            anime_titles (list): Anime titles
+            anime_scores (list): Anime scores
+
+        Returns:
+            str: Written file path
+        """
         file_path = f"static/myanimelist_{rating_type}.txt"
         
         with open(file_path, 
                   file_mode, encoding="utf-8") as file:
             for line in range(len(anime_rankings)):
-                file.write(f"{anime_rankings[line]}. {anime_titles[line]}\nРейтинг: {anime_scores[line]}\n")
+                file.write(
+                    f"{anime_rankings[line]}. {anime_titles[line]}\nРейтинг: {anime_scores[line]}\n"
+                    )
         
         return file_path
     
 class MALSearch:
+    """Handles anime search sequence on MyAnimeList
+    """
     
     def search(self, anime_title: str) -> list:
+        """Handles preprocessing search input and website tags
+
+        Args:
+            anime_title (str): Anime title
+
+        Returns:
+            list: Anime titles that satisfy the search input
+        """
         anime_title = [word for word in anime_title.split()]
-        words = anime_title[:]
         title_in_url = "%20".join(anime_title)
                 
         website = get(search_url.format(title_in_url))
         soup = BeautifulSoup(website.text, "lxml")
         
-        results = self.__get_results(words, soup)
+        results_text = self.__get_results_text(anime_title, soup)
+        results_url = self.__get_results_url(anime_title, soup)
         
-        return results
+        return [results_text, results_url]
 
-    def __get_results(self, words: list, soup: BeautifulSoup) -> list:
-        site_results = soup.select(".title")
-        results = []
+    def __get_results_text(self, words: list, soup: BeautifulSoup) -> list:
+        """Handles filtering by title matching
+
+        Args:
+            words (list): Search input
+            soup (BeautifulSoup): Website html
+
+        Returns:
+            list: Anime titles
+        """
+        site_results = soup.find_all("a", 
+                                     class_="hoverinfo_trigger fw-b fl-l")
+        results_text = []
         
         for result in site_results:
-            result_text = result.select("a")[0].text
+            result_text = result.text
             match = 0
-            
-            if result.select("a"):
-                for word in words:
-                    if word.lower() in result_text.lower():
-                        match += 1
-                if match >= len(words):
-                    results.append(result_text)
-        return results
+            for word in words:
+                if word.lower() in result_text.lower():
+                    match += 1
+            if match >= len(words):
+                results_text.append(result_text)
+        
+        return results_text
+    
+    def __get_results_url(self, words: list, soup: BeautifulSoup) -> list:
+        """Handles filtering by title matching
+
+        Args:
+            words (list): Search input
+            soup (BeautifulSoup): Website html
+
+        Returns:
+            list: URLs
+        """
+        site_urls = soup.find_all(href=True)
+        results_url = []
+        
+        for a in site_urls:
+            match = 0
+            for word in words:
+                if word.lower() in a.text.lower():
+                    match += 1
+            if match >= len(words):
+                results_url.append(a['href'])
+        
+        return results_url
+    
+
+class MALOst:
+    
+    def search(self, url: str) -> list:
+        webpage = get(url)
+        soup = BeautifulSoup(webpage.text, "lxml")
+        
+        st_title_tags = soup.find_all("span", class_="theme-song-title")
+        st_artist_tags = soup.find_all("span", class_="theme-song-artist")
+        
+        soundtracks = []
+        
+        st_info = []
+        
+        st_info = self.__info_extraction(st_title_tags, st_artist_tags)
+        
+        
+        for i in range(len(st_info[0])):
+            soundtracks.append(st_info[0][i] + st_info[1][i])
+        
+        return soundtracks
+
+    def __info_extraction(self, st_title_tags: ResultSet, 
+                          st_artist_tags: ResultSet) -> list:
+        st_titles = []
+        st_artists = []
+        
+        for i in range(len(st_title_tags)):
+            if (st_title_tags[i].text in st_titles)\
+                or (st_artist_tags[i].text in st_artists):
+                continue
+            else:
+                st_titles.append(st_title_tags[i].text)
+                st_artists.append(st_artist_tags[i].text)
+        
+        return [st_titles, st_artists]
