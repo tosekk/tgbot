@@ -693,6 +693,8 @@ def __greeting_text_query(call: CallbackQuery) -> None:
     good_1 = "static/command_stickers/c_good_1.webp"
     good_2 = "static/command_stickers/c_good_2.webp"
     
+    good_list = [good_1, good_2]
+    
     if (call.data == "yes"):
         with open("static/command_stickers/c_text.webp", "rb") as sticker:
             bot.send_sticker(call.message.chat.id, sticker)
@@ -703,7 +705,7 @@ def __greeting_text_query(call: CallbackQuery) -> None:
         sleep(2)
         bot.edit_message_reply_markup(call.message.chat.id, call.message.id)
     if (call.data == "no"):
-        with open(choice(good_1, good_2), "rb") as sticker:
+        with open(choice(good_list), "rb") as sticker:
             bot.send_sticker(call.message.chat.id, sticker)
             bot.send_message(call.message.chat.id, "Хорошо :3")
         bot.edit_message_reply_markup(call.message.chat.id, call.message.id)

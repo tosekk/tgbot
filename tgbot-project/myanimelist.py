@@ -121,7 +121,7 @@ class MALRatings:
         Returns:
             str: Written file path
         """
-        file_path = f"static/myanimelist_{rating_type}.txt"
+        file_path = f"static/text/myanimelist_{rating_type}.txt"
         
         with open(file_path, 
                   file_mode, encoding="utf-8") as file:
