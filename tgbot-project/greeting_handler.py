@@ -45,14 +45,14 @@ class GreetingsHandler:
         """
         text = message_text.split("\n")
 
-        with open("static/texts.txt", "r", encoding="utf-8") as f:
+        with open("static/text/texts.txt", "r", encoding="utf-8") as f:
             file_data = f.readlines()
             if call_data == "text_only":
                 bot.g_type == call_data
 
         file_data = self.__greeting_prep(text, file_data)
 
-        with open("static/texts.txt", "w", encoding="utf-8") as f:
+        with open("static/text/texts.txt", "w", encoding="utf-8") as f:
             f.writelines(file_data)
 
     def reply_handler(self, command: str) -> str:
@@ -68,7 +68,7 @@ class GreetingsHandler:
         start = f"[{command[1:]}]\n"
         stop = f"[{command}]\n"
 
-        with open("static/texts.txt", "r", encoding="utf-8") as replies:
+        with open("static/text/texts.txt", "r", encoding="utf-8") as replies:
             lines = replies.readlines()
             starting_line = lines.index(start) + 1
             stoping_line = lines.index(stop)

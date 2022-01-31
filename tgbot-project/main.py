@@ -1,4 +1,5 @@
 #Standard Modules
+from random import choice, randint
 from time import sleep
 
 #Third-party Modules
@@ -181,19 +182,22 @@ def ask_anime_title(message: Message) -> None:
     Args:
         message (Message): Message
     """
+    
     bot.send_message(message.chat.id, 
-                     "Напишите название аниме(на английском)")
+                     "Напиши название аниме(на английском)")
+    
     if message.text == "/animesearch":
-        bot.register_next_step_handler(message, __show_search_result)
+        bot.register_next_step_handler(message, __check_language,
+                                       __show_search_result, message.text)
     elif message.text == "/animeost":
-        bot.register_next_step_handler(message, __select_anime,
-                                       message.text)
+        bot.register_next_step_handler(message, __check_language,
+                                       __select_anime, message.text)
     elif message.text == "/animecast":
-        bot.register_next_step_handler(message, __select_anime,
-                                       message.text)
+        bot.register_next_step_handler(message, __check_language,
+                                       __select_anime, message.text)
     elif message.text == "/animesummary":
-        bot.register_next_step_handler(message, __select_anime,
-                                       message.text)
+        bot.register_next_step_handler(message, __check_language,
+                                       __select_anime, message.text)
 
    
 def __show_search_result(message: Message) -> None:
@@ -202,14 +206,21 @@ def __show_search_result(message: Message) -> None:
     Args:
         message (Message): Message
     """
+    
     results = anime_search.search(message.text)
     text = ""
     
     for i in range(len(results[0])):
         text += f"<a href=\"{results[1][i]}\">{results[0][i]}</a>\n"
     
+    with open("static/command_stickers/c_found.webp", "rb") as sticker:
+        bot.send_sticker(message.chat.id, sticker)
+    bot.send_message(message.chat.id, "Нашла!")
+    sleep(0.5)
+    bot.send_message(message.chat.id, "Секундочку...")
+    sleep(1)
     bot.send_message(message.chat.id, "<b>Результаты поиска</b>",
-                     parse_mode="html")
+                    parse_mode="html")
     bot.send_message(message.chat.id, text, parse_mode="html")
 
 
@@ -220,6 +231,7 @@ def __select_anime(message: Message, command: str) -> None:
         message (Message): Message
         command (str): Anime command
     """
+    
     title_url = anime_search.search(message.text)
     
     text = ""
@@ -228,15 +240,19 @@ def __select_anime(message: Message, command: str) -> None:
         text += f"{i + 1}. {title_url[0][i]}\n"
     text += f"Выберите один из вариантов(1-{len(title_url[0])})"
     
+    
     bot.send_message(message.chat.id, "<b>Результаты поиска</b>",
-                     parse_mode="html")
+                    parse_mode="html")
     bot.send_message(message.chat.id, text)
     
     if command == "/animeost":
+        __thinking(message)
         bot.register_next_step_handler(message, __search_ost, title_url)
     if command == "/animecast":
+        __thinking(message)
         bot.register_next_step_handler(message, __search_cast, title_url)
     if command == "/animesummary":
+        __thinking(message)
         bot.register_next_step_handler(message, __search_summary, title_url)
 
    
@@ -247,6 +263,7 @@ def __search_ost(message: Message, titles_urls: list) -> None:
         message (Message): Message
         titles_urls (list): List of found anime titles and their urls
     """
+    
     url = titles_urls[1][int(message.text) - 1]
     soundtracks = anime_ost.search(url)
     
@@ -259,6 +276,8 @@ def __search_ost(message: Message, titles_urls: list) -> None:
                      f"<b>Саундтреки {titles_urls[0][int(message.text) - 1]}</b>",
                      parse_mode="html")
     bot.send_message(message.chat.id, text)
+    
+    __send_tired(message)     
 
 
 def __search_cast(message: Message, titles_urls: list) -> None:
@@ -268,6 +287,7 @@ def __search_cast(message: Message, titles_urls: list) -> None:
         message (Message): Message
         titles_urls (list): List of found anime titles and their urls
     """
+    
     url = titles_urls[1][int(message.text) - 1]
     cast = anime_cast.search(url)
     
@@ -286,6 +306,8 @@ def __search_cast(message: Message, titles_urls: list) -> None:
                      f"<b>Актеры {titles_urls[0][int(message.text) - 1]}</b>",
                      parse_mode="html")
     bot.send_message(message.chat.id, text, parse_mode="html")
+    
+    __send_tired(message)   
 
 
 def __search_summary(message: Message, titles_urls: list) -> None:
@@ -295,22 +317,87 @@ def __search_summary(message: Message, titles_urls: list) -> None:
         message (Message): Message
         titles_urls (list): List of found anime titles and their urls
     """
+    
     url = titles_urls[1][int(message.text) - 1]
     summary = anime_summary.search(url)
     
     bot.send_message(message.chat.id, "<b>Синопсис</b>", parse_mode="html")
     bot.send_message(message.chat.id, summary)
     
+    __send_tired(message)    
 
+
+#Sticker Functions
+def __thinking(message: Message) -> None:
+    """Sends thinking sticker
+
+    Args:
+        message (Message): Message
+    """
+    
+    th_stickers = ["static/command_stickers/c_think_1", 
+                   "static/command_stickers/c_think_2",
+                   "static/command_stickers/c_think_3"]
+    
+    th_text = ["Хмм...", "Дай-ка я подумаю...",
+               "Секундочку...", "А может...или...это?"]
+    
+    sticker_index = randint(0, len(th_stickers) - 1)
+    text_index = randint(0, len(th_text) - 1)
+    
+    with open(choice(th_stickers[sticker_index]), "rb") as sticker:
+        bot.send_sticker(message.chat.id, sticker)
+        bot.send_message(message.chat.id, th_text[text_index])
+
+
+def __send_tired(message: Message) -> None:
+    """Sends tired sticker
+
+    Args:
+        message (Message): Message
+    """
+    
+    with open("static/command_stickers/c_tired.webp", "rb") as sticker:
+        bot.send_message(message.chat.id, "Устала...")
+        sleep(1.5)
+        bot.send_sticker(message.chat.id, sticker)   
+
+
+def __check_language(message: Message, func, command: str) -> None:
+    """Checks the message language
+
+    Args:
+        message (Message): Message
+    """
+    
+    if not message.text.isascii():
+        with open("static/command_stickers/c_dunno.webp", "rb") as sticker:
+            bot.send_sticker(message.chat.id, sticker)
+            
+        bot.send_message(message.chat.id, 
+                         "Я говорю на русском, но по нему аниме найти не могу!")
+        bot.send_message(message.chat.id,
+                         "Напиши название аниме на английском!")
+        sleep(0.5)
+        if command == "/animesearch":
+            bot.register_next_step_handler(message, func)
+        else:
+            bot.register_next_step_handler(message, func, command)
+
+# Функции вывода рейтинга аниме
 @bot.message_handler(["animetop"])
 def show_toptype_keyboard(message: Message) -> None:
     """Handles rating type keyboard
     Args:
         message (Message): Message
     """
+    
     toptype_keyboard = __init_toptype_keyboard()
 
-    bot.send_message(message.chat.id, "Выберите рейтинг", 
+    with open("static/command_stickers/c_rating.webp", "rb") as sticker:
+        bot.send_sticker(message.chat.id, sticker)
+    
+    bot.send_message(message.chat.id, "Выбери рейтинг", 
                      reply_markup=toptype_keyboard)
 
     
@@ -321,6 +408,7 @@ def __show_anime_ratings(message: Message, call_data: str) -> None:
         message (Message): Message
         call_data (str): Keyboard call data
     """
+    
     rating_title = __toptype_message(call_data)
     bot.send_message(message.chat.id, rating_title, parse_mode="html")
     
@@ -337,6 +425,7 @@ def __init_toptype_keyboard() -> InlineKeyboardMarkup:
     Returns:
         InlineKeyboardMarkup: Keyboard
     """
+    
     toptype_keyboard = InlineKeyboardMarkup()
 
     alltime = InlineKeyboardButton(text="За все время", 
@@ -365,6 +454,7 @@ def __toptype_message(call_data: str) -> str:
     Returns:
         str: Rating headline
     """
+    
     if call_data == "alltime":
         return "<b>Лучшие За Все Время</b>"
     if call_data == "upcoming":
@@ -386,6 +476,7 @@ def __page_message(message: Message, text: list, increment: int) -> None:
         text (list): Message text
         increment (int): Page increment value
     """
+    
     pages_keyboard = __init_pages_keyboard()
     
     page = __process_text(text, increment)
@@ -403,6 +494,7 @@ def __process_text(text: list, increment: int) -> str:
     Returns:
         str: Message text
     """
+    
     page = []
     
     if increment == 0:
@@ -436,6 +528,7 @@ def __init_pages_keyboard() -> InlineKeyboardMarkup:
     Returns:
         InlineKeyboardMarkup: Keyboard
     """
+    
     pages_keyboard = InlineKeyboardMarkup()
     
     first = InlineKeyboardButton(text="1", callback_data="first")
@@ -448,6 +541,7 @@ def __init_pages_keyboard() -> InlineKeyboardMarkup:
     return pages_keyboard
 
 
+# Функции всех клавиатур
 @bot.callback_query_handler(func=lambda call: True)
 def callback_query(call: CallbackQuery) -> None:
     """Handles InlineKeyboardMarkup's calls
@@ -455,6 +549,7 @@ def callback_query(call: CallbackQuery) -> None:
     Args:
         call (CallbackQuery): InlineKeyboardButton callback
     """
+    
     bot.answer_callback_query(call.id)
     
     #Клавиатура приветствия
@@ -476,27 +571,44 @@ def __greeting_query(call: CallbackQuery) -> None:
     Args:
         call (CallbackQuery): InlineKeyboardButton callback
     """
+    
     if (call.data == "animation"):
         bot.edit_message_reply_markup(call.message.chat.id, call.message.id)
+        
+        with open("static/command_stickers/c_file.webp", "rb") as sticker:
+            bot.send_sticker(call.message.chat.id, sticker)
+        
         bot.send_message(call.message.chat.id, 
-                        "Отправьте мне анимацию в .gif формате :3")
+                            "Отправь мне анимацию в .gif формате :3")
         bot.register_next_step_handler(call.message, __set_welcome_animation,
                                        call.data)
     if (call.data == "sticker"):
         bot.edit_message_reply_markup(call.message.chat.id, call.message.id)
-        bot.send_message(call.message.chat.id, "Отправьте мне стикер :3")
+        
+        with open("static/command_stickers/c_file.webp", "rb") as sticker:
+            bot.send_sticker(call.message.chat.id, sticker)
+        
+        bot.send_message(call.message.chat.id, "Отправь мне стикер :3")
         bot.register_next_step_handler(call.message, __set_welcome_sticker,
                                        call.data)
     if (call.data == "photo"):
         bot.edit_message_reply_markup(call.message.chat.id, call.message.id)
+        
+        with open("static/command_stickers/c_file.webp", "rb") as sticker:
+            bot.send_sticker(call.message.chat.id, sticker)
+        
         bot.send_message(call.message.chat.id, 
-                        "Отправьте мне фото в .png формате :3")
+                        "Отправь мне фото в .png формате :3")
         bot.register_next_step_handler(call.message, __set_welcome_photo,
                                        call.data)
     if (call.data == "text_only"):
         bot.edit_message_reply_markup(call.message.chat.id, call.message.id)
+        
+        with open("static/command_stickers/c_file.webp", "rb") as sticker:
+            bot.send_sticker(call.message.chat.id, sticker)
+        
         bot.send_message(call.message.chat.id, 
-                        "Отправьте мне текст сообщением :3")
+                        "Отправь мне текст сообщением :3")
         bot.register_next_step_handler(call.message, __set_welcome_text,
                                        call.data)
 
@@ -507,6 +619,7 @@ def __page_query(call: CallbackQuery) -> None:
     Args:
         call (CallbackQuery): InlineKeyboardButton callback
     """
+    
     if (call.data == "first"):
         bot.delete_message(call.message.chat.id, call.message.id)
         __page_message(call.message, bot.content, 0)
@@ -527,27 +640,43 @@ def __rating_query(call: CallbackQuery) -> None:
     Args:
         call (CallbackQuery): InlineKeyboardButton callback
     """
+    
     if (call.data == "alltime"):
+        with open("static/command_stickers/c_search.webp", "rb") as sticker:
+            bot.send_sticker(call.message.chat.id, sticker)
+        
         bot.send_message(call.message.chat.id, "Собираю информацию...")
         __show_anime_ratings(call.message, call.data)
         sleep(2)
         bot.edit_message_reply_markup(call.message.chat.id, call.message.id)
     if (call.data == "popular"):
+        with open("static/command_stickers/c_search.webp", "rb") as sticker:
+            bot.send_sticker(call.message.chat.id, sticker)
+        
         bot.send_message(call.message.chat.id, "Собираю информацию...")
         __show_anime_ratings(call.message, call.data)
         sleep(2)
         bot.edit_message_reply_markup(call.message.chat.id, call.message.id)
     if (call.data == "airing"):
+        with open("static/command_stickers/c_search.webp", "rb") as sticker:
+            bot.send_sticker(call.message.chat.id, sticker)
+        
         bot.send_message(call.message.chat.id, "Собираю информацию...")
         __show_anime_ratings(call.message, call.data)
         sleep(2)
         bot.edit_message_reply_markup(call.message.chat.id, call.message.id)
     if (call.data == "upcoming"):
+        with open("static/command_stickers/c_search.webp", "rb") as sticker:
+            bot.send_sticker(call.message.chat.id, sticker)
+        
         bot.send_message(call.message.chat.id, "Собираю информацию...")
         __show_anime_ratings(call.message, call.data)
         sleep(2)
         bot.edit_message_reply_markup(call.message.chat.id, call.message.id)
     if (call.data == "favourite"):
+        with open("static/command_stickers/c_search.webp", "rb") as sticker:
+            bot.send_sticker(call.message.chat.id, sticker)
+        
         bot.send_message(call.message.chat.id, "Собираю информацию...")
         sleep(2)
         __show_anime_ratings(call.message, call.data)
@@ -560,13 +689,23 @@ def __greeting_text_query(call: CallbackQuery) -> None:
     Args:
         call (CallbackQuery): InlineKeyboardButton callback
     """
+    
+    good_1 = "static/command_stickers/c_good_1.webp"
+    good_2 = "static/command_stickers/c_good_2.webp"
+    
     if (call.data == "yes"):
-        bot.register_next_step_handler(call.message, __set_welcome_text)
+        with open("static/command_stickers/c_text.webp", "rb") as sticker:
+            bot.send_sticker(call.message.chat.id, sticker)
         bot.send_message(call.message.chat.id, "Напиши новое приветствие!")
+        
+        bot.register_next_step_handler(call.message, __set_welcome_text)
+        
         sleep(2)
         bot.edit_message_reply_markup(call.message.chat.id, call.message.id)
     if (call.data == "no"):
-        bot.send_message(call.message.chat.id, "Хорошо :3")
+        with open(choice(good_1, good_2), "rb") as sticker:
+            bot.send_sticker(call.message.chat.id, sticker)
+            bot.send_message(call.message.chat.id, "Хорошо :3")
         bot.edit_message_reply_markup(call.message.chat.id, call.message.id)
 
 
