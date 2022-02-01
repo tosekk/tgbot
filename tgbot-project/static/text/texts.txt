@@ -20,4 +20,14 @@
 /animecast - Исполнители ролей аниме
 /animesummary - Синопсис аниме
 /animetrailer - Трейлер аниме
+
+<b>Избранные</b>
+/watchlist - Посмотреть список Избранных
+/watchlater - Добавить аниме в Избранные
 [/help]
+
+[watchlist]
+1. Dr. Stone
+2. Jojo
+2. Death Note
+[/watchlist]

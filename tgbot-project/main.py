@@ -12,11 +12,15 @@ import bot_token
 from greeting_handler import GreetingsHandler
 from myanimelist import (MALRatings, MALSearch, MALOst, 
                          MALCast, MALSummary, MALTrailer)
+from watchlist import Watchlist
 
 
 #Bot Setup
 bot = TeleBot(bot_token.token)
 files_path = f'https://api.telegram.org/file/bot{bot_token.token}/'
+
+#Greetings Handler
+g_handler = GreetingsHandler()
 
 #Anime Commands Classes
 anime_ratings = MALRatings()
@@ -25,15 +29,16 @@ anime_ost = MALOst()
 anime_cast = MALCast()
 anime_summary = MALSummary()
 anime_trailer = MALTrailer()
-#Greetings Handler
-g_handler = GreetingsHandler()
+
+#Watchlist Handler
+watchlist = Watchlist()
 
 #Global Flags
 bot.g_type = "animation"
 bot.page_num = 0
 
 
-@bot.message_handler(commands=['start'])
+@bot.message_handler(['start'])
 def welcome_message(message: Message) -> None:
     """Handles welcome message
 
@@ -62,7 +67,7 @@ def welcome_message(message: Message) -> None:
         bot.send_message(message.chat.id, reply)
 
 
-@bot.message_handler(commands=['help'])
+@bot.message_handler(['help'])
 def help_message(message: Message) -> None:
     """Handles help message
 
@@ -74,7 +79,7 @@ def help_message(message: Message) -> None:
     bot.send_message(message.chat.id, reply, parse_mode='html')
 
 
-@bot.message_handler(commands=['welcomeconfig'])
+@bot.message_handler(['welcomeconfig'])
 def show_greeting_keyboard(message: Message) -> None:
     """Handles greeting configuration
 
@@ -575,6 +580,70 @@ def __init_pages_keyboard() -> InlineKeyboardMarkup:
     pages_keyboard.add(first, prev, next, last, row_width=4)
     
     return pages_keyboard
+
+
+@bot.message_handler(["watchlater"])
+def watchlater(message: Message) -> None:
+    bot.send_message(message.chat.id, 
+                     "Какое аниме хочешь добавить в Избранное?")
+    
+    bot.register_next_step_handler(message, add_to_watchlist)
+    
+
+def add_to_watchlist(message: Message) -> None:
+    anime_title = message.text
+    
+    watchlist.add_entry(anime_title)
+    
+    good_stickers = ["static/command_stickers/c_good_1.webp",
+                     "static/command_stickers/c_good_2.webp"]
+    
+    with open(choice(good_stickers), "rb") as sticker:
+        bot.send_sticker(message.chat.id, sticker)
+        
+    bot.send_message(message.chat.id, 
+                     f"\"{anime_title}\" добавлен в Избранное!")
+
+
+@bot.message_handler(["watchlist"])
+def load_watchlist(message: Message) -> None:
+    
+    anime_titles = watchlist.load_entry()
+    
+    with open("static/command_stickers/c_watchlist.webp", "rb") as sticker:
+        bot.send_sticker(message.chat.id, sticker)
+        bot.send_message(message.chat.id, "<b>Вот твой список Избранных</b>",
+                         parse_mode="html")
+    
+    bot.send_message(message.chat.id, anime_titles)
+    
+
+@bot.message_handler(["pat"])
+def pat_me(message: Message) -> None:
+    
+    with open("static/command_stickers/c_pat.webp", "rb") as sticker:
+        bot.send_sticker(message.chat.id, sticker)
+        bot.send_message(message.chat.id, "UwU")
+    
+    sleep(1.5)
+    
+    love_stickers = ["static/command_stickers/c_love_1.webp",
+                     "static/command_stickers/c_love_2.webp",
+                     "static/command_stickers/c_love_3.webp",
+                     "static/command_stickers/c_love_4.webp"]
+    
+    with open(choice(love_stickers), "rb") as sticker:
+        bot.send_sticker(message.chat.id, sticker)
+        bot.send_message(message.chat.id, "Here you go <3")
+
+
+@bot.message_handler(["cheeks"])
+def pull_cheeks(message: Message) -> None:
+    
+    with open("static/command_stickers/c_cheeks.webp", "rb") as sticker:
+        bot.send_sticker(message.chat.id, sticker)
+        sleep(0.5)
+        bot.send_message(message.chat.id, "Shtawp ish pweez... ㅠㅠ")
 
 
 # Функции всех клавиатур
