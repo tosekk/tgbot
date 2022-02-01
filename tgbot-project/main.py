@@ -45,6 +45,7 @@ def welcome_message(message: Message) -> None:
     Args:
         message (Message): Message that contains the command
     """
+    
     reply = g_handler.reply_handler(message.text)    
     
     if bot.g_type == "sticker":
@@ -74,6 +75,7 @@ def help_message(message: Message) -> None:
     Args:
         message (Message): Message that contains the command
     """
+    
     reply = g_handler.reply_handler(message.text)
 
     bot.send_message(message.chat.id, reply, parse_mode='html')
@@ -86,6 +88,7 @@ def show_greeting_keyboard(message: Message) -> None:
     Args:
         message (Message): Message that contains the command
     """
+    
     bot.send_message(message.chat.id, "Выберите тип приветствия", 
                      reply_markup=__init_greeting_keyboard())
 
@@ -97,6 +100,7 @@ def __set_welcome_animation(message: Message, call_data: str) -> None:
         message (Message): Message
         call_data (str): Keyboard button call data
     """
+    
     g_handler.file_handler(bot, message, call_data, bot_token.token)
     
     text_keyboard = __init_text_keyboard()
@@ -111,6 +115,7 @@ def __set_welcome_sticker(message: Message, call_data: str) -> None:
         message (Message): Message
         call_data (str): Keyboard button call data
     """
+    
     g_handler.file_handler(bot, message, call_data, bot_token.token)
     
     text_keyboard = __init_text_keyboard()
@@ -125,6 +130,7 @@ def __set_welcome_photo(message: Message, call_data: str) -> None:
         message (Message): Message
         call_data (str): Keyboard button call data
     """
+    
     g_handler.file_handler(bot, message, call_data, bot_token.token)
     
     text_keyboard = __init_text_keyboard()
@@ -140,6 +146,7 @@ def __set_welcome_text(message: Message, call_data: str="with_file") -> None:
         call_data (str, optional): Keyboard button call data. 
         Defaults to "with_file".
     """
+    
     g_handler.change_greeting(bot, message.text, call_data)
     bot.send_message(message.chat.id, "Приветствие изменено!")
 
@@ -150,6 +157,7 @@ def __init_greeting_keyboard() -> InlineKeyboardMarkup:
     Returns:
         InlineKeyboardMarkup: Keyboard
     """
+    
     greeting_keyboard = InlineKeyboardMarkup()
 
     anim_key = InlineKeyboardButton(text="Анимация + Текст", 
@@ -173,6 +181,7 @@ def __init_text_keyboard() -> InlineKeyboardMarkup:
     Returns:
         InlineKeyboardMarkup: Keyboard
     """
+    
     text_keyboard = InlineKeyboardMarkup()
     
     yes_key =  InlineKeyboardButton(text="Да", callback_data="yes")
@@ -184,6 +193,11 @@ def __init_text_keyboard() -> InlineKeyboardMarkup:
 
 
 def __init_sticker_keyboard() -> InlineKeyboardMarkup:
+    """Creates sticker type keyboard
+
+    Returns:
+        InlineKeyboardMarkup: Keyboard
+    """
     
     sticker_keyboard = InlineKeyboardMarkup()
     
@@ -346,6 +360,13 @@ def __search_summary(message: Message, titles_urls: list) -> None:
 
 
 def __search_trailer(message: Message, titles_urls: list) -> None:
+    """Handles searching anime trailer
+
+    Args:
+        message (Message): Selected anime
+        titles_urls (list): Anime titles and their urls
+    """
+    
     url = titles_urls[1][int(message.text) - 1]
     anime_title = titles_urls[0][int(message.text) - 1]
     
@@ -425,12 +446,13 @@ def __check_language(message: Message, func, command: str) -> None:
         else:
             func(message, command)
 
+
 # Функции вывода рейтинга аниме
 @bot.message_handler(["animetop"])
 def show_toptype_keyboard(message: Message) -> None:
     """Handles rating type keyboard
     Args:
-        message (Message): Message
+        message (Message): Command
     """
     
     toptype_keyboard = __init_toptype_keyboard()
@@ -446,7 +468,7 @@ def __show_anime_ratings(message: Message, call_data: str) -> None:
     """Handles showing user the ratings
 
     Args:
-        message (Message): Message
+        message (Message): Rating type
         call_data (str): Keyboard call data
     """
     
@@ -513,7 +535,7 @@ def __page_message(message: Message, text: list, increment: int) -> None:
     """Handles page function for the message
 
     Args:
-        message (Message): Message
+        message (Message): Paged message
         text (list): Message text
         increment (int): Page increment value
     """
@@ -584,6 +606,12 @@ def __init_pages_keyboard() -> InlineKeyboardMarkup:
 
 @bot.message_handler(["watchlater"])
 def watchlater(message: Message) -> None:
+    """Handles watchlater command response
+
+    Args:
+        message (Message): Command
+    """
+    
     bot.send_message(message.chat.id, 
                      "Какое аниме хочешь добавить в Избранное?")
     
@@ -591,6 +619,12 @@ def watchlater(message: Message) -> None:
     
 
 def add_to_watchlist(message: Message) -> None:
+    """Handles adding an entry to watchlist
+
+    Args:
+        message (Message): Anime title
+    """
+    
     anime_title = message.text
     
     watchlist.add_entry(anime_title)
@@ -607,6 +641,11 @@ def add_to_watchlist(message: Message) -> None:
 
 @bot.message_handler(["watchlist"])
 def load_watchlist(message: Message) -> None:
+    """Handles watchlist loading
+
+    Args:
+        message (Message): Command
+    """
     
     anime_titles = watchlist.load_entry()
     
@@ -620,6 +659,11 @@ def load_watchlist(message: Message) -> None:
 
 @bot.message_handler(["pat"])
 def pat_me(message: Message) -> None:
+    """Handles pat command response
+
+    Args:
+        message (Message): Command
+    """
     
     with open("static/command_stickers/c_pat.webp", "rb") as sticker:
         bot.send_sticker(message.chat.id, sticker)
@@ -639,6 +683,11 @@ def pat_me(message: Message) -> None:
 
 @bot.message_handler(["cheeks"])
 def pull_cheeks(message: Message) -> None:
+    """Handles cheeks command response
+
+    Args:
+        message (Message): Command
+    """
     
     with open("static/command_stickers/c_cheeks.webp", "rb") as sticker:
         bot.send_sticker(message.chat.id, sticker)
@@ -720,7 +769,11 @@ def __greeting_query(call: CallbackQuery) -> None:
 
 
 def __sticker_query(call: CallbackQuery) -> None:
-    
+    """Handles sticker keyboard
+
+    Args:
+        call (CallbackQuery): Keyboard call
+    """
     if call.data == "ordinary" or call.data == "animated":
         with open("static/command_stickers/c_file.webp", "rb") as sticker:
                 bot.send_sticker(call.message.chat.id, sticker)

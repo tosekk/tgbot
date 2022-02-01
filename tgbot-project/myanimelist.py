@@ -29,6 +29,7 @@ class MALRatings:
         Returns:
             str: File path to the file with rankings listed
         """
+        
         file_mode = "w"
         
         if rating_type == "alltime":
@@ -65,6 +66,7 @@ class MALRatings:
         Returns:
             list: Ranking index
         """
+        
         rankings = []
         
         for element in ranking_table:
@@ -83,6 +85,7 @@ class MALRatings:
         Returns:
             list: Anime titles
         """
+        
         titles = []
         
         for element in ranking_table:
@@ -101,6 +104,7 @@ class MALRatings:
         Returns:
             list: Anime scores
         """
+        
         scores = []
         
         for element in ranking_table:
@@ -125,6 +129,7 @@ class MALRatings:
         Returns:
             str: Written file path
         """
+        
         file_path = f"static/text/myanimelist_{rating_type}.txt"
         
         with open(file_path, 
@@ -149,6 +154,7 @@ class MALSearch:
         Returns:
             list: Anime titles that satisfy the search input
         """
+        
         anime_title = [word for word in anime_title.split()]
         title_in_url = "%20".join(anime_title)
                 
@@ -170,6 +176,7 @@ class MALSearch:
         Returns:
             list: Anime titles
         """
+        
         site_results = soup.find_all("a", 
                                      class_="hoverinfo_trigger fw-b fl-l")
         results_text = []
@@ -195,6 +202,7 @@ class MALSearch:
         Returns:
             list: URLs
         """
+        
         site_urls = soup.find_all(href=True)
         results_url = []
         
@@ -220,6 +228,7 @@ class MALOst:
         Returns:
             list: List of soundtracks
         """
+        
         webpage = get(url)
         soup = BeautifulSoup(webpage.text, "lxml")
         
@@ -249,6 +258,7 @@ class MALOst:
         Returns:
             list: List with nested ost title and artist lists
         """
+        
         st_titles = []
         st_artists = []
         
@@ -274,6 +284,7 @@ class MALCast:
         Returns:
             list: List with nested characters and voice actors lists
         """
+        
         webpage = get(url)
         soup = BeautifulSoup(webpage.text, "lxml")
         
@@ -303,6 +314,7 @@ class MALSummary:
         Returns:
             str: Synopsis text
         """
+        
         webpage = get(url)
         soup = BeautifulSoup(webpage.text, "lxml")
         
@@ -314,6 +326,15 @@ class MALSummary:
 class MALTrailer:
     
     def search(self, url: str) -> str:
+        """Handles searching anime trailer
+
+        Args:
+            url (str): Selected anime webpage
+
+        Returns:
+            str: Video URL
+        """
+        
         webpage = get(url)
         soup = BeautifulSoup(webpage.text, "lxml")
         

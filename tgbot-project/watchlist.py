@@ -1,10 +1,12 @@
-from telebot import TeleBot
-from telebot.types import Message
-
-
 class Watchlist:
-    
+    """Handles watchlist operations
+    """
     def load_entry(self) -> str:
+        """Handles watchlist loading
+
+        Returns:
+            str: Watchlist entries
+        """
         
         entries = ''
         
@@ -22,6 +24,11 @@ class Watchlist:
         return entries
     
     def add_entry(self, entry: str) -> None:
+        """Handles adding entries to watchlist
+
+        Args:
+            entry (str): New entry
+        """
         
         curr_entries = self.load_entry()
         curr_entries = curr_entries.split("/n")
