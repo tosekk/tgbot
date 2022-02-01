@@ -101,19 +101,26 @@ class GreetingsHandler:
                 f.write(file.content)
             self.__g_file_prep(bot, message, "static/g_animation.gif", 0)
 
-        if call_data == "sticker":
+        if call_data == "ordinary":
             file_info = bot.get_file(message.sticker.file_id)
             file = get(photos_path + file_info.file_path, allow_redirects=True)
             with open("static/g_sticker.webp", 'wb') as f:
                 f.write(file.content)
             self.__g_file_prep(bot, message, "static/g_sticker.webp", 1)
+        
+        if call_data == "animated":
+            file_info = bot.get_file(message.sticker.file_id)
+            file = get(photos_path + file_info.file_path, allow_redirects=True)
+            with open("static/g_sticker_anim.tgs", 'wb') as f:
+                f.write(file.content)
+            self.__g_file_prep(bot, message, "static/g_sticker_anim.tgs", 2)
             
         if call_data == "photo":
             file_info = bot.get_file(message.photo.file_id)
             file = get(photos_path + file_info.file_path, allow_redirects=True)
             with open("static/g_photo.png", 'wb') as f:
                 f.write(file.content)
-            self.__g_file_prep(bot, message, "static/g_photo.png", 2)
+            self.__g_file_prep(bot, message, "static/g_photo.png", 3)
 
     #Greeting Text Methods
     def __greeting_time(self) -> int:
@@ -177,8 +184,8 @@ class GreetingsHandler:
             g_file (str): File path
             f_type (int): 0 - animation, 1 - sticker, 2 - photo
         """
-        files = ['Анимация', 'Стикер', 'Фото']
-        ending = ['а', '', 'о']
+        files = ['Анимация', 'Стикер', 'Анимированный стикер', 'Фото']
+        ending = ['а', '', '', 'о']
 
         bot.send_message(message.chat.id, f"{files[f_type]} загружается...")
         sleep(3)
@@ -194,6 +201,10 @@ class GreetingsHandler:
                 bot.g_type = "sticker"
                 bot.send_sticker(message.chat.id, file)
         if f_type == 2:
+            with open(g_file, 'rb') as file:
+                bot.g_type = "animated sticker"
+                bot.send_sticker(message.chat.id, file)
+        if f_type == 3:
             with open(g_file, 'rb') as file:
                 bot.g_type = "photo"
                 bot.send_photo(message.chat.id, file)

@@ -11,7 +11,7 @@ from telebot.types import (CallbackQuery, InlineKeyboardMarkup,
 import bot_token
 from greeting_handler import GreetingsHandler
 from myanimelist import (MALRatings, MALSearch, MALOst, 
-                         MALCast, MALSummary)
+                         MALCast, MALSummary, MALTrailer)
 
 
 #Bot Setup
@@ -24,7 +24,7 @@ anime_search = MALSearch()
 anime_ost = MALOst()
 anime_cast = MALCast()
 anime_summary = MALSummary()
-
+anime_trailer = MALTrailer()
 #Greetings Handler
 g_handler = GreetingsHandler()
 
@@ -45,6 +45,10 @@ def welcome_message(message: Message) -> None:
     if bot.g_type == "sticker":
         with open("static/g_sticker.webp", 'rb') as sticker:
             bot.send_sticker(message.chat.id, sticker)
+            bot.send_message(message.chat.id, reply)
+    elif bot.g_type == "animated sticker":
+        with open("static/g_sticker_anim.tgs", 'rb') as anim:
+            bot.send_animation(message.chat.id, anim)
             bot.send_message(message.chat.id, reply)
     elif bot.g_type == "animation":
         with open("static/g_animation.gif", 'rb') as anim:
@@ -174,8 +178,21 @@ def __init_text_keyboard() -> InlineKeyboardMarkup:
     return text_keyboard
 
 
+def __init_sticker_keyboard() -> InlineKeyboardMarkup:
+    
+    sticker_keyboard = InlineKeyboardMarkup()
+    
+    ordinary = InlineKeyboardButton(text="Обычный", callback_data="ordinary")
+    animated = InlineKeyboardButton(text="Анимированный", callback_data="animated")
+    
+    sticker_keyboard.add(ordinary, animated, row_width=2)
+    
+    return sticker_keyboard
+
+
 @bot.message_handler(commands=['animesearch', 'animeost', 
-                               'animecast', 'animesummary'])
+                               'animecast', 'animesummary',
+                               'animetrailer'])
 def ask_anime_title(message: Message) -> None:
     """Handles anime search by title
 
@@ -189,13 +206,7 @@ def ask_anime_title(message: Message) -> None:
     if message.text == "/animesearch":
         bot.register_next_step_handler(message, __check_language,
                                        __show_search_result, message.text)
-    elif message.text == "/animeost":
-        bot.register_next_step_handler(message, __check_language,
-                                       __select_anime, message.text)
-    elif message.text == "/animecast":
-        bot.register_next_step_handler(message, __check_language,
-                                       __select_anime, message.text)
-    elif message.text == "/animesummary":
+    else:
         bot.register_next_step_handler(message, __check_language,
                                        __select_anime, message.text)
 
@@ -254,6 +265,8 @@ def __select_anime(message: Message, command: str) -> None:
     if command == "/animesummary":
         __thinking(message)
         bot.register_next_step_handler(message, __search_summary, title_url)
+    if command == "/animetrailer":
+        bot.register_next_step_handler(message, __search_trailer, title_url)
 
    
 def __search_ost(message: Message, titles_urls: list) -> None:
@@ -327,6 +340,27 @@ def __search_summary(message: Message, titles_urls: list) -> None:
     __send_tired(message)    
 
 
+def __search_trailer(message: Message, titles_urls: list) -> None:
+    url = titles_urls[1][int(message.text) - 1]
+    anime_title = titles_urls[0][int(message.text) - 1]
+    
+    with open("static/command_stickers/c_search.webp", "rb") as sticker:
+        bot.send_sticker(message.chat.id, sticker)
+        
+    bot.send_message(message.chat.id, "Начинаю поиск :3")
+    
+    trailer_url = anime_trailer.search(url)
+    trailer_url = f"<a href=\"{trailer_url}\">{anime_title}</a>"
+    
+    sleep(1.5)
+    with open("static/command_stickers/c_found.webp", "rb") as sticker:
+        bot.send_sticker(message.chat.id, sticker)
+        
+    bot.send_message(message.chat.id, "Нашла!")
+    bot.send_message(message.chat.id, trailer_url, parse_mode="html",
+                     disable_web_page_preview=False)  
+
+
 #Sticker Functions
 def __thinking(message: Message) -> None:
     """Sends thinking sticker
@@ -378,11 +412,13 @@ def __check_language(message: Message, func, command: str) -> None:
                          "Я говорю на русском, но по нему аниме найти не могу!")
         bot.send_message(message.chat.id,
                          "Напиши название аниме на английском!")
-        sleep(0.5)
+        bot.register_next_step_handler(message, __check_language, 
+                                       func, command)
+    else:
         if command == "/animesearch":
-            bot.register_next_step_handler(message, func)
+            func(message)
         else:
-            bot.register_next_step_handler(message, func, command)
+            func(message, command)
 
 # Функции вывода рейтинга аниме
 @bot.message_handler(["animetop"])
@@ -555,6 +591,9 @@ def callback_query(call: CallbackQuery) -> None:
     #Клавиатура приветствия
     __greeting_query(call)
     
+    #Клавиатура стикера
+    __sticker_query(call)
+    
     #Клавиатура видов рейтинга
     __rating_query(call)
 
@@ -585,12 +624,10 @@ def __greeting_query(call: CallbackQuery) -> None:
     if (call.data == "sticker"):
         bot.edit_message_reply_markup(call.message.chat.id, call.message.id)
         
-        with open("static/command_stickers/c_file.webp", "rb") as sticker:
-            bot.send_sticker(call.message.chat.id, sticker)
+        sticker_keyboard = __init_sticker_keyboard()
         
-        bot.send_message(call.message.chat.id, "Отправь мне стикер :3")
-        bot.register_next_step_handler(call.message, __set_welcome_sticker,
-                                       call.data)
+        bot.send_message(call.message.chat.id, "Вид стикера",
+                         reply_markup=sticker_keyboard)
     if (call.data == "photo"):
         bot.edit_message_reply_markup(call.message.chat.id, call.message.id)
         
@@ -611,6 +648,17 @@ def __greeting_query(call: CallbackQuery) -> None:
                         "Отправь мне текст сообщением :3")
         bot.register_next_step_handler(call.message, __set_welcome_text,
                                        call.data)
+
+
+def __sticker_query(call: CallbackQuery) -> None:
+    
+    if call.data == "ordinary" or call.data == "animated":
+        with open("static/command_stickers/c_file.webp", "rb") as sticker:
+                bot.send_sticker(call.message.chat.id, sticker)
+            
+        bot.send_message(call.message.chat.id, "Отправь мне стикер :3")
+        bot.register_next_step_handler(call.message, __set_welcome_sticker,
+                                    call.data)
 
       
 def __page_query(call: CallbackQuery) -> None:

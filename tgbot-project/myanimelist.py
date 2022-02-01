@@ -1,12 +1,16 @@
 #Third Party Modules
 from bs4 import BeautifulSoup
 from bs4.element import ResultSet
+
+
+#Standard Modules
 from requests import get
 
 
 #URL
 ranking_url = "https://myanimelist.net/topanime.php?{}limit={}"
 search_url = "https://myanimelist.net/anime.php?q={}&cat=anime"
+youtube_url = "https://www.youtube.com/watch?v={}"
 
 #File Format Variables
 site_name = "myanimelist"
@@ -305,3 +309,19 @@ class MALSummary:
         summary_tags = soup.find_all("p", itemprop="description")
         
         return summary_tags[0].text
+    
+
+class MALTrailer:
+    
+    def search(self, url: str) -> str:
+        webpage = get(url)
+        soup = BeautifulSoup(webpage.text, "lxml")
+        
+        video_tags = soup.find_all("a", class_="video-unit")
+        
+        video_link = video_tags[0]['href']
+        start = video_link.rfind("/") + 1
+        stop = video_link.find("?")
+        final_link = youtube_url.format(video_link[start:stop])
+        
+        return final_link
