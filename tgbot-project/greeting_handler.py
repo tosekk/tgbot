@@ -174,7 +174,7 @@ class GreetingsHandler:
         current_time = dt.now()
         current_hour = current_time.hour
 
-        if 6 < current_hour < 12:
+        if 6 <= current_hour < 12:
             selected = 0
         elif 12 <= current_hour < 21:
             selected = 1
