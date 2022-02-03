@@ -23,8 +23,8 @@ This project is built using Python 3.9.7. The main framework used was [pyTelegra
 
 #### Available commands
 **COMMANDS**                 **DESCRIPTION**\
-**/start**                            Starts the bot. Sends the welcome message\
-**/help**                        Shows the list of commands and their description\
+**/start**                             Starts the bot. Sends the welcome message\
+**/help**                               Shows the list of commands and their description\
 **/welcomeconfig**            Lets user change welcome message type and text message: Photo + text, Sticker + text, Animiation + text, Only text\
 **/animetop**                Top 100 Anime by categories: Alltime, Airing, Upcoming, Popular, Favourite\
 **/animesearch**             Searches by anime title and sends a message with links\
