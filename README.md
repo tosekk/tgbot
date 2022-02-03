@@ -28,7 +28,7 @@ This project is built using Python 3.9.7. The main framework used was [pyTelegra
 **/welcomeconfig**            Lets user change welcome message type and text message: Photo + text, Sticker + text, Animiation + text, Only text\
 **/animetop**                     Top 100 Anime by categories: Alltime, Airing, Upcoming, Popular, Favourite\
 **/animesearch**                Searches by anime title and sends a message with links\
-**/animeost**                    Searches by anime title and presents a list of anime OSTs\
+**/animeost**                     Searches by anime title and presents a list of anime OSTs\
 **/animecast**                    Searches by anime title and presents a list of anime cast with links to anime characters and voice actors\
-**/animesummary**             Searches by anime title and presents the anime synopsis\
+**/animesummary**            Searches by anime title and presents the anime synopsis\
 **/animetrailer**                 Searches by anime title and presents a link to the video
