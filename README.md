@@ -35,4 +35,4 @@ This project is built using Python 3.9.7. The main framework used was [pyTelegra
 **/animetrailer**                 Searches by anime title and presents a link to the video
 
 ## Setup
-Use ```pip install -r requirements.txt``` to install all of the dependencies.
+Use `pip install -r requirements.txt` to install all of the dependencies.
