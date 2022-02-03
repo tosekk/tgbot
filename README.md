@@ -6,6 +6,7 @@ Not that simple telegram bot written in Python that gathers info about anime ran
 [Technologies](#technologies)\
 [Features](#features)\
 [Available commands](#available-commands)
+[Setup](#setup)
 
 ## Project info
 This project is built using Python 3.9.7. The main framework used was [pyTelegramBotAPI](https://github.com/eternnoir/pyTelegramBotAPI) as well as [BeautifulSoup4](https://www.crummy.com/software/BeautifulSoup/bs4/doc/) for some web scraping functions. This project's purpose is to teach my students(at the academy that I work at) Python and how to create a Telegram bot using it. All information related to anime is gathered from [MyAnimeList](https://myanimelist.net/)
@@ -32,3 +33,6 @@ This project is built using Python 3.9.7. The main framework used was [pyTelegra
 **/animecast**                    Searches by anime title and presents a list of anime cast with links to anime characters and voice actors\
 **/animesummary**           Searches by anime title and presents the anime synopsis\
 **/animetrailer**                 Searches by anime title and presents a link to the video
+
+## Setup
+Use ```pip install -r requirements.txt``` to install all of the dependencies.
