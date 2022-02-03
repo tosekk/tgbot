@@ -35,4 +35,8 @@ This project is built using Python 3.9.7. The main framework used was [pyTelegra
 **/animetrailer**                 Searches by anime title and presents a link to the video
 
 ## Setup
-Use `pip install -r requirements.txt` to install all of the dependencies.
+Clone this repo to your desired location and use `pip install -r requirements.txt` to install all of the dependencies.\
+Once the dependencies are installed you can run the bot in terminal using `python main.py`.\
+But before that you should call @BotFather in Telegram and create new bot so that you get the bot token. Once you receive the token place it on the 21st line in main.py instead of the `bot_token.token` variable.\
+Your token line should look like this:\
+`bot = TeleBot('your bot token')`
