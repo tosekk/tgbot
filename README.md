@@ -4,7 +4,7 @@ Not that simple telegram bot written in Python that gathers info about anime ran
 ## Table of Contents
 [Project info](#project-info)
 [Technologies](#technologies)
-[Functions](#functions)
+[Features](#features)
 [Available commands]($available-commands)
 
 ## Project info
