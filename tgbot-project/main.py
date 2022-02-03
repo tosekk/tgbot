@@ -407,7 +407,7 @@ def __thinking(message: Message) -> None:
     sticker_index = randint(0, len(th_stickers) - 1)
     text_index = randint(0, len(th_text) - 1)
     
-    with open(choice(th_stickers[sticker_index]), "rb") as sticker:
+    with open(choice(th_stickers), "rb") as sticker:
         bot.send_sticker(message.chat.id, sticker)
         bot.send_message(message.chat.id, th_text[text_index])
 
