@@ -397,9 +397,9 @@ def __thinking(message: Message) -> None:
         message (Message): Message
     """
     
-    th_stickers = ["static/command_stickers/c_think_1", 
-                   "static/command_stickers/c_think_2",
-                   "static/command_stickers/c_think_3"]
+    th_stickers = ["static/command_stickers/c_think_1.webp", 
+                   "static/command_stickers/c_think_2.webp",
+                   "static/command_stickers/c_think_3.webp"]
     
     th_text = ["Хмм...", "Дай-ка я подумаю...",
                "Секундочку...", "А может...или...это?"]

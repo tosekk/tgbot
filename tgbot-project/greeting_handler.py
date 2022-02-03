@@ -178,7 +178,7 @@ class GreetingsHandler:
             selected = 0
         elif 12 <= current_hour < 21:
             selected = 1
-        elif 21 < current_hour or current_hour < 6:
+        elif 21 <= current_hour or current_hour < 6:
             selected = 2
         
         return selected

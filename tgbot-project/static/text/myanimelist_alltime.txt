@@ -1,28 +1,28 @@
 1. Fullmetal Alchemist: Brotherhood
 Рейтинг: 9.15
-2. Gintama°
-Рейтинг: 9.09
+2. Shingeki no Kyojin: The Final Season Part 2
+Рейтинг: 9.10
 3. Shingeki no Kyojin Season 3 Part 2
 Рейтинг: 9.09
 4. Steins;Gate
 Рейтинг: 9.09
-5. Fruits Basket: The Final
+5. Gintama°
+Рейтинг: 9.09
+6. Fruits Basket: The Final
 Рейтинг: 9.06
-6. Gintama'
+7. Gintama'
 Рейтинг: 9.06
-7. Hunter x Hunter (2011)
+8. Hunter x Hunter (2011)
 Рейтинг: 9.05
-8. Ginga Eiyuu Densetsu
+9. Ginga Eiyuu Densetsu
 Рейтинг: 9.04
-9. Gintama': Enchousen
+10. Gintama': Enchousen
 Рейтинг: 9.04
-10. Gintama: The Final
+11. Gintama: The Final
 Рейтинг: 9.03
-11. Shingeki no Kyojin: The Final Season Part 2
-Рейтинг: 8.99
-12. Violet Evergarden Movie
+12. Gintama.
 Рейтинг: 8.98
-13. Gintama.
+13. Violet Evergarden Movie
 Рейтинг: 8.98
 14. 3-gatsu no Lion 2nd Season
 Рейтинг: 8.97
@@ -45,7 +45,7 @@
 23. Kimi no Na wa.
 Рейтинг: 8.88
 24. Ousama Ranking
-Рейтинг: 8.84
+Рейтинг: 8.83
 25. Shiguang Dailiren
 Рейтинг: 8.83
 26. Gintama.: Shirogane no Tamashii-hen
@@ -58,27 +58,27 @@
 Рейтинг: 8.81
 30. Haikyuu!!: Karasuno Koukou vs. Shiratorizawa Gakuen Koukou
 Рейтинг: 8.80
-31. Sen to Chihiro no Kamikakushi
+31. Kimetsu no Yaiba: Yuukaku-hen
+Рейтинг: 8.80
+32. Sen to Chihiro no Kamikakushi
 Рейтинг: 8.79
-32. Monogatari Series: Second Season
+33. Monogatari Series: Second Season
 Рейтинг: 8.78
-33. Mushoku Tensei: Isekai Ittara Honki Dasu Part 2
+34. Mushoku Tensei: Isekai Ittara Honki Dasu Part 2
 Рейтинг: 8.78
-34. Kimetsu no Yaiba: Yuukaku-hen
-Рейтинг: 8.78
-35. Kingdom 3rd Season
+35. Odd Taxi
 Рейтинг: 8.77
-36. Odd Taxi
+36. Kingdom 3rd Season
 Рейтинг: 8.77
-37. Shouwa Genroku Rakugo Shinjuu: Sukeroku Futatabi-hen
+37. Cowboy Bebop
 Рейтинг: 8.76
-38. Cowboy Bebop
+38. Shouwa Genroku Rakugo Shinjuu: Sukeroku Futatabi-hen
 Рейтинг: 8.76
-39. Fate/stay night Movie: Heaven's Feel - III. Spring Song
+39. Mushishi Zoku Shou 2nd Season
 Рейтинг: 8.74
-40. Hajime no Ippo
+40. Fate/stay night Movie: Heaven's Feel - III. Spring Song
 Рейтинг: 8.74
-41. Mushishi Zoku Shou 2nd Season
+41. Hajime no Ippo
 Рейтинг: 8.74
 42. Vinland Saga
 Рейтинг: 8.73
@@ -142,11 +142,11 @@
 Рейтинг: 8.61
 72. Ookami Kodomo no Ame to Yuki
 Рейтинг: 8.60
-73. JoJo no Kimyou na Bouken Part 6: Stone Ocean
+73. Kizumonogatari II: Nekketsu-hen
 Рейтинг: 8.60
-74. Kizumonogatari II: Nekketsu-hen
-Рейтинг: 8.60
-75. JoJo no Kimyou na Bouken Part 5: Ougon no Kaze
+74. JoJo no Kimyou na Bouken Part 5: Ougon no Kaze
+Рейтинг: 8.59
+75. JoJo no Kimyou na Bouken Part 6: Stone Ocean
 Рейтинг: 8.59
 76. Shouwa Genroku Rakugo Shinjuu
 Рейтинг: 8.59
@@ -156,12 +156,12 @@
 Рейтинг: 8.58
 79. Yojouhan Shinwa Taikei
 Рейтинг: 8.58
-80. Fate/Zero 2nd Season
+80. Hajime no Ippo: Rising
 Рейтинг: 8.58
-81. Hajime no Ippo: Rising
+81. Kimi no Suizou wo Tabetai
 Рейтинг: 8.58
-82. Kimi no Suizou wo Tabetai
-Рейтинг: 8.58
+82. Fate/Zero 2nd Season
+Рейтинг: 8.57
 83. Fruits Basket 2nd Season
 Рейтинг: 8.57
 84. Kimetsu no Yaiba
