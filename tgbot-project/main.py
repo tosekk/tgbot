@@ -279,12 +279,15 @@ def __select_anime(message: Message, command: str) -> None:
     
     if command == "/animeost":
         __thinking(message)
+        sleep(1.5)
         bot.register_next_step_handler(message, __search_ost, title_url)
     if command == "/animecast":
         __thinking(message)
+        sleep(1.5)
         bot.register_next_step_handler(message, __search_cast, title_url)
     if command == "/animesummary":
         __thinking(message)
+        sleep(1.5)
         bot.register_next_step_handler(message, __search_summary, title_url)
     if command == "/animetrailer":
         bot.register_next_step_handler(message, __search_trailer, title_url)
